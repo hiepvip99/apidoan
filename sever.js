@@ -1,33 +1,21 @@
-const express = require('express');
+const express = require("express");
+const bodyParser = require("body-parser");
 const app = express();
-const bodyParser = require('body-parser');
-require('dotenv');
-const port = process.env.PORT || 3000;
 
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware
 app.use(bodyParser.json());
 
+// Import routes
+const authRoutes = require("./routes/auth");
+const shoesRoutes = require("./routes/shoes");
+const customersRoutes = require("./routes/customers");
 
-// CORS
+// Set up routes
+app.use("/auth", authRoutes);
+app.use("/shoes", shoesRoutes);
+app.use("/customers", customersRoutes);
 
-app.use((req, res, next) => {
-    res.append('Access-Control-Allow-Origin', ['*']);
-    res.append('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.append('Access-Control-Allow-Headers', 'Content-Type');
-    next();
+// Start the server
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });
-
-// const routes = require('./api/routes') //importing route
-const routes = require('./api/route/accountRouter'); //importing route
-// routes(app)
-app.use('/api', routes);
-
-app.use(function(req, res) {
-    res.status(404).send({url: req.originalUrl + ' not found'});
-});
-
-
-
-app.listen(port);
-
-console.log('RESTful API server started on: ' + port);

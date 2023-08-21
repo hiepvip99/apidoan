@@ -36,10 +36,10 @@ app.get('/accountAll', function (req, res) {
     });
 });
 // Retrieve user with id 
-app.get('/account/:keyword', function (req, res) {
-    let keyword = req.params.keyword;
+app.get('/account', function (req, res) {
+    let keyword = req.query.keyword;
     if (!keyword) {
-        return res.status(400).json({ error: true, message: 'Please provide account_id' });
+        return res.status(404).json({ error: true, message: 'Please provide account_id or username' , status: 404});
     }
     dbConn.query("SELECT * FROM shoe_account where id like '%" + keyword + "%' or username like '%" + keyword + "%'", function (error, results, fields) {
         if (error) throw error;
@@ -233,76 +233,76 @@ app.delete('/manufacturer', function (req, res) {
         return res.json({ error: false, data: results, message: 'manufacturer has been deleted successfully.' });
     });
 });
-// Day la phan shoe_supplier
-// Day la phan shoe_supplier
-// Day la phan shoe_supplier
+// // Day la phan shoe_supplier
+// // Day la phan shoe_supplier
+// // Day la phan shoe_supplier
 
-app.get('/supplierAll', function (req, res) {
-    dbConn.query('SELECT * FROM shoe_supplier', function (error, results, fields) {
-        if (error) throw error;
-        return res.json(results);
-    });
-});
+// app.get('/supplierAll', function (req, res) {
+//     dbConn.query('SELECT * FROM shoe_supplier', function (error, results, fields) {
+//         if (error) throw error;
+//         return res.json(results);
+//     });
+// });
 
-app.get('/supplier/:id', function (req, res) {
-    let id = req.params.id;
-    if (!id) {
-        return res.status(400).json({ error: true, message: 'Please provide supplier_id' });
-    }
-    dbConn.query('SELECT * FROM shoe_supplier where id=?', id, function (error, results, fields) {
-        if (error) throw error;
-        return res.json(results[0]);
-    });
-});
+// app.get('/supplier/:id', function (req, res) {
+//     let id = req.params.id;
+//     if (!id) {
+//         return res.status(400).json({ error: true, message: 'Please provide supplier_id' });
+//     }
+//     dbConn.query('SELECT * FROM shoe_supplier where id=?', id, function (error, results, fields) {
+//         if (error) throw error;
+//         return res.json(results[0]);
+//     });
+// });
 
-app.post('/supplier', function (req, res) {
-    let name = req.body.name;
-    if (!name) {
-        return res.status(400).json({ error: true, message: 'Please provide supplier name' });
-    }
-    dbConn.query("SELECT * FROM shoe_supplier where name=?", name, function (error, results, fields) {
-        if (error) throw error;
-        if (!results[0]) {
-            dbConn.query("INSERT INTO shoe_supplier SET ? ", { name: name }, function (error, results, fields) {
-                if (error) throw error;
-                return res.json({ error: false, data: results, message: 'New supplier has been created successfully.' });
-            });
-        } else {
-            return res.json({ error: true, data: results, message: `This supplier already exists: ${name}` });
-        }
-    });
-});
+// app.post('/supplier', function (req, res) {
+//     let name = req.body.name;
+//     if (!name) {
+//         return res.status(400).json({ error: true, message: 'Please provide supplier name' });
+//     }
+//     dbConn.query("SELECT * FROM shoe_supplier where name=?", name, function (error, results, fields) {
+//         if (error) throw error;
+//         if (!results[0]) {
+//             dbConn.query("INSERT INTO shoe_supplier SET ? ", { name: name }, function (error, results, fields) {
+//                 if (error) throw error;
+//                 return res.json({ error: false, data: results, message: 'New supplier has been created successfully.' });
+//             });
+//         } else {
+//             return res.json({ error: true, data: results, message: `This supplier already exists: ${name}` });
+//         }
+//     });
+// });
 
-app.put('/supplier', function (req, res) {
-    let id = req.body.id;
-    let name = req.body.name;
+// app.put('/supplier', function (req, res) {
+//     let id = req.body.id;
+//     let name = req.body.name;
 
-    if (!id || !name) {
-        return res.status(400).json({ error: user, message: 'Please provide id and name' });
-    }
-    dbConn.query("SELECT * FROM shoe_supplier where name= ?", [name, id], function (error, results, fields) {
-        if (!results[0]) {
-            dbConn.query("UPDATE shoe_supplier SET ? WHERE id = ?", [{ name: name }, id], function (error, results, fields) {
-                if (error) throw error;
-                return res.json({ error: false, data: results, message: 'supplier has been updated successfully.' });
-            });
-        } else {
-            return res.json({ error: true, data: results, message: `The supplier's name is duplicated: ${name}` });
-        }
-    });
+//     if (!id || !name) {
+//         return res.status(400).json({ error: user, message: 'Please provide id and name' });
+//     }
+//     dbConn.query("SELECT * FROM shoe_supplier where name= ?", [name, id], function (error, results, fields) {
+//         if (!results[0]) {
+//             dbConn.query("UPDATE shoe_supplier SET ? WHERE id = ?", [{ name: name }, id], function (error, results, fields) {
+//                 if (error) throw error;
+//                 return res.json({ error: false, data: results, message: 'supplier has been updated successfully.' });
+//             });
+//         } else {
+//             return res.json({ error: true, data: results, message: `The supplier's name is duplicated: ${name}` });
+//         }
+//     });
 
-});
+// });
 
-app.delete('/supplier', function (req, res) {
-    let id = req.body.id;
-    if (!id) {
-        return res.status(400).json({ error: true, message: 'Please provide supplier_id' });
-    }
-    dbConn.query('DELETE FROM shoe_supplier WHERE id = ?', [id], function (error, results, fields) {
-        if (error) throw error;
-        return res.json({ error: false, data: results, message: 'supplier has been deleted successfully.' });
-    });
-});
+// app.delete('/supplier', function (req, res) {
+//     let id = req.body.id;
+//     if (!id) {
+//         return res.status(400).json({ error: true, message: 'Please provide supplier_id' });
+//     }
+//     dbConn.query('DELETE FROM shoe_supplier WHERE id = ?', [id], function (error, results, fields) {
+//         if (error) throw error;
+//         return res.json({ error: false, data: results, message: 'supplier has been deleted successfully.' });
+//     });
+// });
 
 // Day la phan shoe_customer
 // Day la phan shoe_customer
