@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const { validateEmail, validatePassword } = require("../utils/validation");
+// const jwt = require("jsonwebtoken");
+// const { validateEmail, validatePassword } = require("../utils/validation");
 const db = require("../databases/db");
 
 const authController = {

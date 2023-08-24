@@ -1,19 +1,18 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const multer = require("multer");
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
 
 // Import routes
-const authRoutes = require("./routes/auth");
-const shoesRoutes = require("./routes/shoes");
-const customersRoutes = require("./routes/customers");
+const authRoutes = require("./api/routes/auth");
+const categoryRoutes = require("./api/routes/category");
 
 // Set up routes
-app.use("/auth", authRoutes);
-app.use("/shoes", shoesRoutes);
-app.use("/customers", customersRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/category", categoryRoutes);
 
 // Start the server
 app.listen(3000, () => {
