@@ -15,6 +15,7 @@ const shoeColorRoute = require("./api/routes/shoeColorRoute");
 const shoeSizeRoute = require("./api/routes/shoeSizeRoute");
 const shoeDecentralizationRoutes = require("./api/routes/shoeDecentralizationRoutes");
 const shoeManufacturerRoutes = require("./api/routes/shoeManufacturerRoutes");
+const shoeProductRoutes = require("./api/routes/shoeProductRoutes");
 
 // Set up routes
 app.use("/api/auth", authRoutes);
@@ -25,6 +26,7 @@ app.use("/api/color", shoeColorRoute);
 app.use("/api/size", shoeSizeRoute);
 app.use("/api/decentralization", shoeDecentralizationRoutes);
 app.use("/api/manufacturer", shoeManufacturerRoutes);
+app.use("/api/product", shoeProductRoutes);
 
 // Start the server
 app.listen(3000, () => {
