@@ -37,7 +37,7 @@ app.get('/accountAll', function (req, res) {
 });
 // Retrieve user with id 
 app.get('/account', function (req, res) {
-    let keyword = req.query.keyword;
+    let keyword = req.params.keyword;
     if (!keyword) {
         return res.status(404).json({ error: true, message: 'Please provide account_id or username' , status: 404});
     }

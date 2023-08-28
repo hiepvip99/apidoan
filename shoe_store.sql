@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th8 24, 2023 lúc 03:27 PM
+-- Thời gian đã tạo: Th8 28, 2023 lúc 03:28 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.0.28
 
@@ -35,6 +35,13 @@ CREATE TABLE `shoe_account` (
   `status_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `shoe_account`
+--
+
+INSERT INTO `shoe_account` (`id`, `username`, `password`, `decentralization_id`, `status_id`) VALUES
+(2, 'admin', 'admin', 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -45,6 +52,17 @@ CREATE TABLE `shoe_account_status` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_account_status`
+--
+
+INSERT INTO `shoe_account_status` (`id`, `name`) VALUES
+(1, 'Active'),
+(2, 'Inactive'),
+(3, 'Locked'),
+(4, 'Pending'),
+(5, 'Closed');
 
 -- --------------------------------------------------------
 
@@ -57,6 +75,18 @@ CREATE TABLE `shoe_category` (
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `shoe_category`
+--
+
+INSERT INTO `shoe_category` (`id`, `name`) VALUES
+(1, 'Giầy thể thao'),
+(2, '0'),
+(3, ''),
+(4, ''),
+(5, 'Giầy khiêu vũ'),
+(6, 'sssss');
+
 -- --------------------------------------------------------
 
 --
@@ -67,6 +97,13 @@ CREATE TABLE `shoe_color` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_color`
+--
+
+INSERT INTO `shoe_color` (`id`, `name`) VALUES
+(1, 'name');
 
 -- --------------------------------------------------------
 
@@ -93,6 +130,14 @@ CREATE TABLE `shoe_decentralization` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_decentralization`
+--
+
+INSERT INTO `shoe_decentralization` (`id`, `name`) VALUES
+(1, 'Admin'),
+(2, 'User');
 
 -- --------------------------------------------------------
 
@@ -129,6 +174,15 @@ CREATE TABLE `shoe_manufacturer` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_manufacturer`
+--
+
+INSERT INTO `shoe_manufacturer` (`id`, `name`) VALUES
+(1, 'Nike'),
+(2, 'Adidas'),
+(3, 'Adidas');
 
 -- --------------------------------------------------------
 
@@ -169,7 +223,8 @@ CREATE TABLE `shoe_order_detail` (
 CREATE TABLE `shoe_product` (
   `id` int(11) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `manufacturer_id` int(11) DEFAULT NULL,
+  `manufacturer_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
   `gender` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -328,25 +383,25 @@ ALTER TABLE `shoe_size`
 -- AUTO_INCREMENT cho bảng `shoe_account`
 --
 ALTER TABLE `shoe_account`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_account_status`
 --
 ALTER TABLE `shoe_account_status`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_category`
 --
 ALTER TABLE `shoe_category`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_color`
 --
 ALTER TABLE `shoe_color`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_customer`
@@ -358,7 +413,7 @@ ALTER TABLE `shoe_customer`
 -- AUTO_INCREMENT cho bảng `shoe_decentralization`
 --
 ALTER TABLE `shoe_decentralization`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_image_customer`
@@ -376,7 +431,7 @@ ALTER TABLE `shoe_image_product`
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_product_colors`
