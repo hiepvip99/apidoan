@@ -4,7 +4,8 @@ const router = express.Router();
 const shoeProductController = require("../controllers/shoeProductController");
 
 // Định nghĩa route GET /shoeProducts
-router.get("/shoeProducts", shoeProductController.getAll);
+// router.get("/shoeProducts", shoeProductController.getAll);
+router.get("/shoeProducts", shoeProductController.getAllProduct);
 
 // Định nghĩa route GET /shoeProducts/:id
 router.get("/shoeProducts/:id", shoeProductController.getById);

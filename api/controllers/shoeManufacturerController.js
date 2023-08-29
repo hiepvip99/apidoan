@@ -31,10 +31,11 @@ const shoeManufacturerController = {
   },
 
   getAll(req, res) {
-    const page = req.params.page || 1;
-    const step = req.params.step || 10;
+    const page = req.query.page || 1;
+    const step = req.query.step || 10;
     const offset = (page - 1) * step;
-    const keyword = req.params.keyword || "";
+    const keyword = req.query.keyword || "";
+    console.log("keyword:", keyword);
     db.query(
       "SELECT COUNT(*) AS total FROM shoe_manufacturer",
       (err, countResult) => {
