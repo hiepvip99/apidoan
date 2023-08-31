@@ -14,6 +14,10 @@ router.post("/shoeOrders", shoeOrderController.add);
 
 // Định nghĩa route PUT /shoeOrders/:id
 router.put("/shoeOrders", shoeOrderController.update);
+// Định nghĩa route PUT /shoeOrders/:id
+
+
+router.put("/shoeOrders/status", shoeOrderController.statusChange);
 
 // Định nghĩa route DELETE /shoeOrders/:id
 router.delete("/shoeOrders/:id", shoeOrderController.delete);
