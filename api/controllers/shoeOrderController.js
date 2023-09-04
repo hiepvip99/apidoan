@@ -130,94 +130,97 @@ const shoeOrderController = {
     const page = req.query.page || 1;
     const step = req.query.step || 10;
     const offset = (page - 1) * step;
-    const keyword = req.query.keyword || "";
-    console.log("keyword:", keyword);
-    db.query("SELECT COUNT(*) AS total FROM shoe_order", (err, countResult) => {
-      if (err) {
-        console.error("Error executing MySQL query:", err);
-        const data = {
-          status: 500,
-          error: true,
-        };
-        res.status(500).json(data);
-        return;
-      }
-      const total = countResult[0].total;
-      const totalPages = Math.ceil(total / step);
-      // Truy vấn tất cả các đơn hàng từ bảng `shoe_order`
-      const getAllOrdersQuery = `
+    const date = req.query.date || "";
+    console.log("date:", date);
+    db.query(
+      `SELECT COUNT(*) AS total FROM shoe_order WHERE order_date LIKE '%${date}%'`,
+      (err, countResult) => {
+        if (err) {
+          console.error("Error executing MySQL query:", err);
+          const data = {
+            status: 500,
+            error: true,
+          };
+          res.status(500).json(data);
+          return;
+        }
+        const total = countResult[0].total;
+        const totalPages = Math.ceil(total / step);
+        // Truy vấn tất cả các đơn hàng từ bảng `shoe_order`
+        const getAllOrdersQuery = `
     SELECT *
-    FROM shoe_order
+    FROM shoe_order WHERE order_date LIKE '%${date}%''
   `;
 
-      db.query(getAllOrdersQuery, (err, orderResults) => {
-        if (err) {
-          console.error("Lỗi truy vấn dữ liệu đơn hàng: ", err);
-          res.status(500).json({ error: "Lỗi truy vấn dữ liệu đơn hàng" });
-        } else {
-          if (orderResults.length === 0) {
-            res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+        db.query(getAllOrdersQuery, (err, orderResults) => {
+          if (err) {
+            console.error("Lỗi truy vấn dữ liệu đơn hàng: ", err);
+            res.status(500).json({ error: "Lỗi truy vấn dữ liệu đơn hàng" });
           } else {
-            // Tạo mảng chứa thông tin tất cả các đơn hàng
-            const orders = orderResults.map((order) => {
-              // Truy vấn danh sách chi tiết đơn hàng từ bảng `shoe_order_detail`
-              const getOrderDetailQuery = `
+            if (orderResults.length === 0) {
+              res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+            } else {
+              // Tạo mảng chứa thông tin tất cả các đơn hàng
+              const orders = orderResults.map((order) => {
+                // Truy vấn danh sách chi tiết đơn hàng từ bảng `shoe_order_detail`
+                const getOrderDetailQuery = `
             SELECT *
             FROM shoe_order_detail
             WHERE order_id = ${order.id}
           `;
 
-              return new Promise((resolve, reject) => {
-                db.query(getOrderDetailQuery, (err, detailResults) => {
-                  if (err) {
-                    console.error(
-                      "Lỗi truy vấn dữ liệu chi tiết đơn hàng: ",
-                      err
-                    );
-                    reject("Lỗi truy vấn dữ liệu chi tiết đơn hàng");
-                  } else {
-                    const orderDetails = detailResults.map((detail) => ({
-                      id: detail.id,
-                      order_id: detail.order_id,
-                      product_id: detail.product_id,
-                      color_id: detail.color_id,
-                      size_id: detail.size_id,
-                      quantity: detail.quantity,
-                    }));
+                return new Promise((resolve, reject) => {
+                  db.query(getOrderDetailQuery, (err, detailResults) => {
+                    if (err) {
+                      console.error(
+                        "Lỗi truy vấn dữ liệu chi tiết đơn hàng: ",
+                        err
+                      );
+                      reject("Lỗi truy vấn dữ liệu chi tiết đơn hàng");
+                    } else {
+                      const orderDetails = detailResults.map((detail) => ({
+                        id: detail.id,
+                        order_id: detail.order_id,
+                        product_id: detail.product_id,
+                        color_id: detail.color_id,
+                        size_id: detail.size_id,
+                        quantity: detail.quantity,
+                      }));
 
-                    resolve({
-                      id: order.id,
-                      account_id: order.account_id,
-                      order_date: order.order_date,
-                      total_price: order.total_price,
-                      status: order.status,
-                      total_quantity: order.total_quantity,
-                      details: orderDetails,
-                    });
-                  }
+                      resolve({
+                        id: order.id,
+                        account_id: order.account_id,
+                        order_date: order.order_date,
+                        total_price: order.total_price,
+                        status: order.status,
+                        total_quantity: order.total_quantity,
+                        details: orderDetails,
+                      });
+                    }
+                  });
                 });
               });
-            });
 
-            Promise.all(orders)
-              .then((orderData) => {
-                // Trả về kết quả
-                const data = {
-                  currentPage: parseInt(page),
-                  step: parseInt(step),
-                  totalPages: totalPages,
-                  data: orderData,
-                };
-                res.status(200).json(data);
-                // res.json(orderData);
-              })
-              .catch((error) => {
-                res.status(500).json({ error });
-              });
+              Promise.all(orders)
+                .then((orderData) => {
+                  // Trả về kết quả
+                  const data = {
+                    currentPage: parseInt(page),
+                    step: parseInt(step),
+                    totalPages: totalPages,
+                    data: orderData,
+                  };
+                  res.status(200).json(data);
+                  // res.json(orderData);
+                })
+                .catch((error) => {
+                  res.status(500).json({ error });
+                });
+            }
           }
-        }
-      });
-    });
+        });
+      }
+    );
   },
 
   add(req, res) {
@@ -285,30 +288,55 @@ const shoeOrderController = {
     });
   },
 
-  update(req, res) {
-    const id = req.body.id;
-    const name = req.body.name;
+  addOrderDetail(req, res) {
+    const { order_id, product_id, color_id, size_id, quantity } = req.body;
 
-    db.query(
-      "UPDATE shoe_order SET name = ? WHERE id = ?",
-      [name, id],
-      (err, results) => {
-        if (err) {
-          console.error("Error executing MySQL query:", err);
-          const data = {
-            status: 500,
-            error: true,
-          };
-          res.status(500).json(data);
-          return;
-        }
-        const data = {
-          status: 200,
-        };
-        res.status(200).json(data);
+    // Kiểm tra xem các trường thông tin cần thiết đã được cung cấp hay chưa
+    if (!order_id || !product_id || !color_id || !size_id || !quantity) {
+      res.status(400).json({ error: "Thiếu thông tin cần thiết" });
+      return;
+    }
+
+    // Tạo câu lệnh INSERT để thêm mới dữ liệu vào bảng shoe_order_detail
+    const addOrderDetailQuery = `INSERT INTO shoe_order_detail (order_id, product_id, color_id, size_id, quantity)
+    VALUES (${order_id}, ${product_id}, ${color_id}, ${size_id}, ${quantity})`;
+
+    db.query(addOrderDetailQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi thêm mới dữ liệu: ", err);
+        res.status(500).json({ error: "Lỗi thêm mới dữ liệu" });
+      } else {
+        res
+          .status(201)
+          .json({ message: "Thêm mới chi tiết đơn hàng thành công" });
       }
-    );
+    });
   },
+
+  // update(req, res) {
+  //   const id = req.body.id;
+  //   const name = req.body.name;
+
+  //   db.query(
+  //     "UPDATE shoe_order SET name = ? WHERE id = ?",
+  //     [name, id],
+  //     (err, results) => {
+  //       if (err) {
+  //         console.error("Error executing MySQL query:", err);
+  //         const data = {
+  //           status: 500,
+  //           error: true,
+  //         };
+  //         res.status(500).json(data);
+  //         return;
+  //       }
+  //       const data = {
+  //         status: 200,
+  //       };
+  //       res.status(200).json(data);
+  //     }
+  //   );
+  // },
 
   statusChange(req, res) {
     const id = req.query.id;
@@ -334,23 +362,23 @@ const shoeOrderController = {
     );
   },
 
-  delete(req, res) {
-    const id = req.params.id;
-    db.query("DELETE FROM shoe_order WHERE id = ?", [id], (err, results) => {
-      if (err) {
-        const data = {
-          status: 500,
-          error: true,
-        };
-        res.status(500).json(data);
-        return;
-      }
-      const data = {
-        status: 200,
-      };
-      res.status(200).json(data);
-    });
-  },
+  // delete(req, res) {
+  //   const id = req.params.id;
+  //   db.query("DELETE FROM shoe_order WHERE id = ?", [id], (err, results) => {
+  //     if (err) {
+  //       const data = {
+  //         status: 500,
+  //         error: true,
+  //       };
+  //       res.status(500).json(data);
+  //       return;
+  //     }
+  //     const data = {
+  //       status: 200,
+  //     };
+  //     res.status(200).json(data);
+  //   });
+  // },
 };
 
 module.exports = shoeOrderController;

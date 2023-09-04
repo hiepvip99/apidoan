@@ -502,6 +502,8 @@ const shoeProductController = {
           const data = {
             status: 500,
             error: true,
+            detail:
+              "do not delete record in shoe_product_colors WHERE product_id",
           };
           res.status(500).json(data);
           return;
@@ -516,6 +518,8 @@ const shoeProductController = {
               const data = {
                 status: 500,
                 error: true,
+                detail:
+                  "do not delete record in shoe_product_colors WHERE product_id",
               };
               res.status(500).json(data);
               return;

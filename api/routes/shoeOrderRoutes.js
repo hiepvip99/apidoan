@@ -13,13 +13,13 @@ router.get("/shoeOrders/:id", shoeOrderController.getById);
 router.post("/shoeOrders", shoeOrderController.add);
 
 // Định nghĩa route PUT /shoeOrders/:id
-router.put("/shoeOrders", shoeOrderController.update);
+// router.put("/shoeOrders", shoeOrderController.update);
 // Định nghĩa route PUT /shoeOrders/:id
 
 
 router.put("/shoeOrders/status", shoeOrderController.statusChange);
 
 // Định nghĩa route DELETE /shoeOrders/:id
-router.delete("/shoeOrders/:id", shoeOrderController.delete);
+// router.delete("/shoeOrders/:id", shoeOrderController.delete);
 
 module.exports = router;
