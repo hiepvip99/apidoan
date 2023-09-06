@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 // Import routes
 const authRoutes = require("./api/routes/auth");
 const categoryRoutes = require("./api/routes/category");
-const accountStatusRoutes = require("./api/routes/accountStatus");
+const accountRoutes = require("./api/routes/accountRoute");
 const shoeCustomerRoute = require("./api/routes/shoeCustomerRoute");
 const shoeColorRoute = require("./api/routes/shoeColorRoute");
 const shoeSizeRoute = require("./api/routes/shoeSizeRoute");
@@ -21,7 +21,7 @@ const shoeOrderRoutes = require("./api/routes/shoeOrderRoutes");
 // Set up routes
 app.use("/api/auth", authRoutes);
 app.use("/api/category", categoryRoutes);
-app.use("/api/accountStatus", accountStatusRoutes);
+app.use("/api/account", accountRoutes);
 app.use("/api/customer", shoeCustomerRoute);
 app.use("/api/color", shoeColorRoute);
 app.use("/api/size", shoeSizeRoute);

@@ -11,10 +11,12 @@ router.get("/shoeProducts", shoeProductController.getAllProduct);
 router.get("/shoeProducts/:id", shoeProductController.getById);
 
 // Định nghĩa route POST /shoeProducts
-router.post("/shoeProducts", shoeProductController.add);
+router.post("/shoeProducts", shoeProductController.addProduct);
 
 // Định nghĩa route PUT /shoeProducts/:id
-router.put("/shoeProducts", shoeProductController.update);
+router.put("/shoeProducts", shoeProductController.updateProduct);
+
+// router.put("/shoeProducts", shoeProductController.updateP);
 
 // Định nghĩa route DELETE /shoeProducts/:id
 router.delete("/shoeProducts/:id", shoeProductController.delete);

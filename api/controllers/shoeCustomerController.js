@@ -71,9 +71,9 @@ function getAllShoeCustomers(req, res) {
 }
 
 // Controller để lấy một khách hàng giày dựa trên ID
-function getShoeCustomerById(req, res) {
-  const id = req.param.id;
-  const query = "SELECT * FROM shoe_customer WHERE id = ?";
+function getShoeCustomerByIdAccount(req, res) {
+  const id = req.param.accountId;
+  const query = "SELECT * FROM shoe_customer WHERE id_account = ?";
 
   // Thực hiện truy vấn
   db.query(query, [id], (error, results) => {
@@ -86,7 +86,13 @@ function getShoeCustomerById(req, res) {
       res.status(500).json(data);
     } else {
       if (results.length === 0) {
-        res.status(404).json({ error: "Không tìm thấy khách hàng giày" });
+        const data = {
+          status: 404,
+          detail: "Không tìm thấy khách hàng",
+          error: true,
+        };
+        res.status(404).json(data);
+        // res.status(404).json({ error: "Không tìm thấy khách hàng" });
       } else {
         res.status(200).json(results[0]);
       }
@@ -188,7 +194,7 @@ function getShoeCustomersByAccountId(req, res) {
 
 module.exports = {
   getAllShoeCustomers,
-  getShoeCustomerById,
+  getShoeCustomerByIdAccount,
   createShoeCustomer,
   updateShoeCustomer,
   deleteShoeCustomer,

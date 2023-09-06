@@ -6,7 +6,10 @@ const shoeCustomerController = require("../controllers/shoeCustomerController");
 
 // Định nghĩa các route
 router.get("/shoe_customers", shoeCustomerController.getAllShoeCustomers);
-router.get("/shoe_customers/:id", shoeCustomerController.getShoeCustomerById);
+router.get(
+  "/shoe_customers/:id",
+  shoeCustomerController.getShoeCustomerByIdAccount
+);
 router.post("/shoe_customers", shoeCustomerController.createShoeCustomer);
 router.put("/shoe_customers/:id", shoeCustomerController.updateShoeCustomer);
 router.delete("/shoe_customers/:id", shoeCustomerController.deleteShoeCustomer);

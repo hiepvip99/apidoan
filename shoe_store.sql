@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th8 28, 2023 lúc 05:13 PM
+-- Thời gian đã tạo: Th9 05, 2023 lúc 05:32 AM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.0.28
 
@@ -63,6 +63,21 @@ INSERT INTO `shoe_account_status` (`id`, `name`) VALUES
 (3, 'Locked'),
 (4, 'Pending'),
 (5, 'Closed');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `shoe_cart`
+--
+
+CREATE TABLE `shoe_cart` (
+  `id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `color_id` int(11) NOT NULL,
+  `size_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -151,6 +166,19 @@ CREATE TABLE `shoe_image_customer` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `shoe_image_product`
+--
+
+CREATE TABLE `shoe_image_product` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `color_id` int(11) NOT NULL,
+  `image_path` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `shoe_manufacturer`
 --
 
@@ -179,7 +207,7 @@ CREATE TABLE `shoe_order` (
   `account_id` int(11) NOT NULL,
   `order_date` datetime NOT NULL,
   `total_price` int(11) NOT NULL,
-  `status` int(11) NOT NULL,
+  `status_id` int(11) NOT NULL,
   `total_quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -201,15 +229,38 @@ CREATE TABLE `shoe_order_detail` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `shoe_order_status`
+--
+
+CREATE TABLE `shoe_order_status` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_order_status`
+--
+
+INSERT INTO `shoe_order_status` (`id`, `name`) VALUES
+(1, 'Chờ xác nhận'),
+(2, 'Chờ vận chuyển'),
+(3, 'Đang giao'),
+(4, 'Đã giao'),
+(5, 'Đã hủy'),
+(6, 'Trả hàng');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `shoe_product`
 --
 
 CREATE TABLE `shoe_product` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
   `manufacturer_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
-  `gender` varchar(10) DEFAULT NULL
+  `gender` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -305,6 +356,16 @@ ALTER TABLE `shoe_account_status`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Chỉ mục cho bảng `shoe_cart`
+--
+ALTER TABLE `shoe_cart`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `account_id` (`account_id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `color_id` (`color_id`),
+  ADD KEY `size_id` (`size_id`);
+
+--
 -- Chỉ mục cho bảng `shoe_category`
 --
 ALTER TABLE `shoe_category`
@@ -337,6 +398,12 @@ ALTER TABLE `shoe_image_customer`
   ADD KEY `fk_customer_id` (`customer_id`);
 
 --
+-- Chỉ mục cho bảng `shoe_image_product`
+--
+ALTER TABLE `shoe_image_product`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Chỉ mục cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
@@ -358,6 +425,12 @@ ALTER TABLE `shoe_order_detail`
   ADD KEY `order_items_ibfk_3` (`color_id`),
   ADD KEY `order_items_ibfk_4` (`size_id`),
   ADD KEY `fk_order_id` (`order_id`);
+
+--
+-- Chỉ mục cho bảng `shoe_order_status`
+--
+ALTER TABLE `shoe_order_status`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Chỉ mục cho bảng `shoe_product`
@@ -407,6 +480,12 @@ ALTER TABLE `shoe_account_status`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
+-- AUTO_INCREMENT cho bảng `shoe_cart`
+--
+ALTER TABLE `shoe_cart`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `shoe_category`
 --
 ALTER TABLE `shoe_category`
@@ -437,6 +516,12 @@ ALTER TABLE `shoe_image_customer`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `shoe_image_product`
+--
+ALTER TABLE `shoe_image_product`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
@@ -453,6 +538,12 @@ ALTER TABLE `shoe_order`
 --
 ALTER TABLE `shoe_order_detail`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `shoe_order_status`
+--
+ALTER TABLE `shoe_order_status`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_product`
@@ -488,6 +579,15 @@ ALTER TABLE `shoe_size`
 ALTER TABLE `shoe_account`
   ADD CONSTRAINT `fk_account_decentralization` FOREIGN KEY (`decentralization_id`) REFERENCES `shoe_decentralization` (`id`),
   ADD CONSTRAINT `fk_account_status` FOREIGN KEY (`status_id`) REFERENCES `shoe_account_status` (`id`);
+
+--
+-- Các ràng buộc cho bảng `shoe_cart`
+--
+ALTER TABLE `shoe_cart`
+  ADD CONSTRAINT `shoe_cart_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `shoe_account` (`id`),
+  ADD CONSTRAINT `shoe_cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `shoe_product` (`id`),
+  ADD CONSTRAINT `shoe_cart_ibfk_3` FOREIGN KEY (`color_id`) REFERENCES `shoe_product_colors` (`id`),
+  ADD CONSTRAINT `shoe_cart_ibfk_4` FOREIGN KEY (`size_id`) REFERENCES `shoe_product_size` (`product_size_id`);
 
 --
 -- Các ràng buộc cho bảng `shoe_customer`
