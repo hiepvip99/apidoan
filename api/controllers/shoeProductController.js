@@ -151,7 +151,7 @@ const shoeProductController = {
           res.status(500).json(data);
           return;
         }
-        const total = countResult[0].total;
+        const total = countResult[0].total || 0;
         const totalPages = Math.ceil(total / step);
         // Truy vấn tất cả thông tin sản phẩm từ bảng shoe_product
         const getAllProductsQuery = `SELECT * FROM shoe_product ${condition} LIMIT ${offset}, ${parseInt(

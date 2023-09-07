@@ -20,6 +20,19 @@ const AccountController = {
     );
   },
 
+  getAllStatusAccount(req, res) {
+    db.query("SELECT * FROM shoe_account_status", (error, results) => {
+      if (error) {
+        console.error("Error retrieving accountStatus: ", error);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({ error: "AccountStatus not found" });
+      }
+      res.json(results[0]);
+    });
+  },
+
   getAccountById(req, res) {
     const accountId = req.query.accountId;
 
@@ -90,7 +103,8 @@ const AccountController = {
           res.status(500).json(data);
           return;
         }
-        const total = countResult[0].total;
+        console.log(countResult);
+        const total = countResult[0].total || 0;
         const totalPages = Math.ceil(total / step);
 
         const sql = `
@@ -140,6 +154,126 @@ const AccountController = {
         });
       }
     );
+  },
+
+  addAccount(req, res) {
+    const { username, password, decentralization_id, status_id } = req.body;
+    console.log("username", username);
+    console.log("password", password);
+    console.log("decentralization_id", decentralization_id);
+    console.log("status_id", status_id);
+    if (
+      username === undefined ||
+      password === undefined ||
+      decentralization_id === undefined ||
+      status_id === undefined
+    ) {
+      const data = {
+        status: 500,
+        detail: "Invalid account infomation",
+      };
+      return res.status(500).json(data);
+    } else {
+      // Thực hiện kiểm tra dữ liệu đầu vào (validation)
+      db.query(
+        `SELECT * FROM shoe_account WHERE username = ?`,
+        [username.toLowerCase()],
+        (err, result) => {
+          if (err) {
+            console.error("Error executing query:", err);
+            return res.status(500).json({ error: "Failed to execute query" });
+          }
+
+          if (result && result.length > 0) {
+            // Người dùng đã tồn tại, thực hiện hành động tương ứng
+            const data = {
+              status: 500,
+              detail: "Username is exist",
+            };
+            return res.status(500).json(data);
+            // ...
+          } else {
+            // Thực hiện truy vấn để thêm bản ghi mới
+            const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?)`;
+            const values = [
+              username.toLowerCase(),
+              password,
+              decentralization_id,
+              status_id,
+            ];
+
+            db.query(sql, values, (err, result) => {
+              if (err) {
+                console.error("Error adding account:", err);
+                // res.status(500).json({ error: "Failed to add account" });
+                const data = {
+                  status: 500,
+                  detail: "Failed to add account",
+                };
+                res.status(500).json(data);
+              } else {
+                const data = {
+                  status: 200,
+                };
+                res.status(200).json(data);
+                // res.json({ message: "Account added successfully" });
+              }
+            });
+          }
+        }
+      );
+      // ...
+    }
+  },
+
+  updateAccount(req, res) {
+    // const accountId = req.params.id;
+    const { username, password, decentralization_id, status_id, id } = req.body;
+
+    // Thực hiện kiểm tra dữ liệu đầu vào (validation)
+    // ...
+
+    // Thực hiện truy vấn để cập nhật bản ghi
+    const sql = `UPDATE shoe_account SET username = ?, password = ?, decentralization_id = ?, status_id = ? WHERE id = ?`;
+    const values = [username, password, decentralization_id, status_id, id];
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Error updating account:", err);
+        res.status(500).json({ error: "Failed to update account" });
+      } else {
+        res.json({ message: "Account updated successfully" });
+      }
+    });
+  },
+
+  deleteAccount(req, res) {
+    const accountId = req.body.id;
+    console.log("da vao del accid: ", accountId);
+    // Thực hiện truy vấn để xóa bản ghi
+    const sql = `DELETE FROM shoe_account WHERE id = ?`;
+    const values = [accountId];
+
+    if (accountId === undefined) {
+      return;
+    }
+
+    db.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("Error deleting account:", err);
+        const data = {
+          status: 500,
+          detail: "Failed to delete account",
+        };
+        res.status(500).json(data);
+        // res.status(500).json({ error: "Failed to delete account" });
+      } else {
+        const data = {
+          status: 200,
+        };
+        res.status(200).json(data);
+      }
+    });
   },
 };
 

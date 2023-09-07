@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 // Import routes
 const authRoutes = require("./api/routes/auth");
 const categoryRoutes = require("./api/routes/category");
-const accountRoutes = require("./api/routes/accountRoute");
+const accountRoutes = require("./api/routes/shoeAccountRoute");
 const shoeCustomerRoute = require("./api/routes/shoeCustomerRoute");
 const shoeColorRoute = require("./api/routes/shoeColorRoute");
 const shoeSizeRoute = require("./api/routes/shoeSizeRoute");

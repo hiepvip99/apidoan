@@ -144,7 +144,7 @@ const shoeOrderController = {
           res.status(500).json(data);
           return;
         }
-        const total = countResult[0].total;
+        const total = countResult[0].total || 0;
         const totalPages = Math.ceil(total / step);
         // Truy vấn tất cả các đơn hàng từ bảng `shoe_order`
         const getAllOrdersQuery = `
