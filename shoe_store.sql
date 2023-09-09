@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th9 05, 2023 lúc 05:32 AM
+-- Thời gian đã tạo: Th9 08, 2023 lúc 04:57 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.0.28
 
@@ -40,7 +40,10 @@ CREATE TABLE `shoe_account` (
 --
 
 INSERT INTO `shoe_account` (`id`, `username`, `password`, `decentralization_id`, `status_id`) VALUES
-(2, 'admin', 'admin', 1, 1);
+(2, 'admin', 'admin1234', 1, 1),
+(3, 'user', 'user1234', 2, 1),
+(4, 'abc', 'aaaaaaaa', 2, 2),
+(8, 'testlancuoi', '12345678', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -129,8 +132,16 @@ CREATE TABLE `shoe_customer` (
   `phone_number` varchar(20) NOT NULL,
   `date_of_birth` date NOT NULL,
   `email` varchar(255) DEFAULT NULL,
-  `id_account` int(11) NOT NULL
+  `id_account` int(11) NOT NULL,
+  `image` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`image`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_customer`
+--
+
+INSERT INTO `shoe_customer` (`id`, `name`, `phone_number`, `date_of_birth`, `email`, `id_account`, `image`) VALUES
+(1, 'Lê Minh Tú', '1234648979', '1996-10-11', 'leminh444@gmail.com', 3, '{     \"image_path\": \"https://jsonformatter.org/\"   }');
 
 -- --------------------------------------------------------
 
@@ -154,26 +165,12 @@ INSERT INTO `shoe_decentralization` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `shoe_image_customer`
+-- Cấu trúc bảng cho bảng `shoe_image`
 --
 
-CREATE TABLE `shoe_image_customer` (
+CREATE TABLE `shoe_image` (
   `id` int(11) NOT NULL,
-  `customer_id` int(11) NOT NULL,
   `image_path` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `shoe_image_product`
---
-
-CREATE TABLE `shoe_image_product` (
-  `id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `color_id` int(11) NOT NULL,
-  `image_path` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -194,7 +191,15 @@ CREATE TABLE `shoe_manufacturer` (
 INSERT INTO `shoe_manufacturer` (`id`, `name`) VALUES
 (1, 'Nike'),
 (2, 'Adidas'),
-(3, 'Adidas');
+(3, 'Adidas'),
+(4, 'vin'),
+(8, 'd'),
+(9, 'fff'),
+(10, 'ccc'),
+(11, 'sds'),
+(12, 'fss'),
+(13, 'rewrwr'),
+(14, 'fdsfsa');
 
 -- --------------------------------------------------------
 
@@ -280,16 +285,17 @@ CREATE TABLE `shoe_product_colors` (
   `id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `color_id` int(11) NOT NULL,
-  `price` int(11) NOT NULL
+  `price` int(11) NOT NULL,
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`images`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_product_colors`
 --
 
-INSERT INTO `shoe_product_colors` (`id`, `product_id`, `color_id`, `price`) VALUES
-(1, 1, 1, 500000),
-(2, 1, 2, 600000);
+INSERT INTO `shoe_product_colors` (`id`, `product_id`, `color_id`, `price`, `images`) VALUES
+(1, 1, 1, 500000, '[   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   } ]'),
+(2, 1, 2, 600000, '');
 
 -- --------------------------------------------------------
 
@@ -391,16 +397,9 @@ ALTER TABLE `shoe_decentralization`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `shoe_image_customer`
+-- Chỉ mục cho bảng `shoe_image`
 --
-ALTER TABLE `shoe_image_customer`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_customer_id` (`customer_id`);
-
---
--- Chỉ mục cho bảng `shoe_image_product`
---
-ALTER TABLE `shoe_image_product`
+ALTER TABLE `shoe_image`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -471,7 +470,7 @@ ALTER TABLE `shoe_size`
 -- AUTO_INCREMENT cho bảng `shoe_account`
 --
 ALTER TABLE `shoe_account`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_account_status`
@@ -501,7 +500,7 @@ ALTER TABLE `shoe_color`
 -- AUTO_INCREMENT cho bảng `shoe_customer`
 --
 ALTER TABLE `shoe_customer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_decentralization`
@@ -510,22 +509,16 @@ ALTER TABLE `shoe_decentralization`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT cho bảng `shoe_image_customer`
+-- AUTO_INCREMENT cho bảng `shoe_image`
 --
-ALTER TABLE `shoe_image_customer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `shoe_image_product`
---
-ALTER TABLE `shoe_image_product`
+ALTER TABLE `shoe_image`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order`
@@ -594,12 +587,6 @@ ALTER TABLE `shoe_cart`
 --
 ALTER TABLE `shoe_customer`
   ADD CONSTRAINT `shoe_customer_ibfk_1` FOREIGN KEY (`id_account`) REFERENCES `shoe_account` (`id`);
-
---
--- Các ràng buộc cho bảng `shoe_image_customer`
---
-ALTER TABLE `shoe_image_customer`
-  ADD CONSTRAINT `fk_customer_id` FOREIGN KEY (`customer_id`) REFERENCES `shoe_customer` (`id`);
 
 --
 -- Các ràng buộc cho bảng `shoe_order`

@@ -104,7 +104,10 @@ const AccountController = {
           return;
         }
         console.log(countResult);
-        const total = countResult[0].total || 0;
+        let total = 1;
+        if (countResult.length > 0) {
+          total = countResult[0].total < 1 ? 1 : countResult[0].total;
+        }
         const totalPages = Math.ceil(total / step);
 
         const sql = `
@@ -228,21 +231,55 @@ const AccountController = {
 
   updateAccount(req, res) {
     // const accountId = req.params.id;
-    const { username, password, decentralization_id, status_id, id } = req.body;
+    const { /*  username,  */ password, decentralization_id, status_id, id } =
+      req.body;
 
-    // Thực hiện kiểm tra dữ liệu đầu vào (validation)
-    // ...
+    // Tạo danh sách các cột cần cập nhật
+    const updateColumns = [];
+    const updateValues = [];
+
+    // Kiểm tra từng thuộc tính và thêm vào danh sách cập nhật nếu được gửi và không rỗng
+    if (password !== undefined && password !== "") {
+      updateColumns.push("password");
+      updateValues.push(password);
+    }
+    if (decentralization_id !== undefined && decentralization_id !== "") {
+      updateColumns.push("decentralization_id");
+      updateValues.push(decentralization_id);
+    }
+    if (status_id !== undefined && status_id !== "") {
+      updateColumns.push("status_id");
+      updateValues.push(status_id);
+    }
+
+    // Nếu không có thuộc tính nào được gửi, trả về lỗi
+    if (updateColumns.length === 0) {
+      const data = {
+        status: 500,
+        detail: "No account information to update",
+      };
+      return res.status(500).json(data);
+    }
 
     // Thực hiện truy vấn để cập nhật bản ghi
-    const sql = `UPDATE shoe_account SET username = ?, password = ?, decentralization_id = ?, status_id = ? WHERE id = ?`;
-    const values = [username, password, decentralization_id, status_id, id];
+    const sql = `UPDATE shoe_account SET ${updateColumns
+      .map((column) => `${column} = ?`)
+      .join(", ")} WHERE id = ?`;
+    const values = [...updateValues, id];
 
     db.query(sql, values, (err, result) => {
       if (err) {
         console.error("Error updating account:", err);
-        res.status(500).json({ error: "Failed to update account" });
+        const data = {
+          status: 500,
+          detail: "Failed to update account",
+        };
+        res.status(500).json(data);
       } else {
-        res.json({ message: "Account updated successfully" });
+        const data = {
+          status: 200,
+        };
+        res.status(200).json(data);
       }
     });
   },

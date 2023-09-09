@@ -22,7 +22,11 @@ function getAllShoeCustomers(req, res) {
         res.status(500).json(data);
         return;
       }
-      const total = countResult[0].total || 0;
+      let total = 1;
+      if (countResult.length > 0) {
+        total = countResult[0].total < 1 ? 1 : countResult[0].total;
+      }
+      // const total = countResult[0].total || 0;
       const totalPages = Math.ceil(total / step);
       db.query(
         `SELECT * FROM shoe_customer where name like 

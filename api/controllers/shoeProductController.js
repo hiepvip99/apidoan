@@ -151,7 +151,11 @@ const shoeProductController = {
           res.status(500).json(data);
           return;
         }
-        const total = countResult[0].total || 0;
+        let total = 1;
+        if (countResult.length > 0) {
+          total = countResult[0].total < 1 ? 1 : countResult[0].total;
+        }
+        // const total = countResult[0].total || 0;
         const totalPages = Math.ceil(total / step);
         // Truy vấn tất cả thông tin sản phẩm từ bảng shoe_product
         const getAllProductsQuery = `SELECT * FROM shoe_product ${condition} LIMIT ${offset}, ${parseInt(
@@ -200,10 +204,19 @@ const shoeProductController = {
                   } else {
                     // Lặp qua từng màu sắc và thêm vào mảng colors của sản phẩm
                     for (let j = 0; j < colorResults.length; j++) {
+                      
                       const color = colorResults[j];
+                      let images = [];
+
+                      if (color.images) {
+                        const imageUrlsArray = JSON.parse(color.images);
+                        images = imageUrlsArray.map((url) => ({ url }));
+                      }
+
                       productWithDetails.colors.push({
                         color_id: color.color_id,
                         price: color.price,
+                        images: images,
                       });
                     }
 
@@ -351,6 +364,8 @@ const shoeProductController = {
             }
           });
         });
+
+
 
         // Trả về ID của sản phẩm mới
         res.json({ id: newProductId });

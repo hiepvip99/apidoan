@@ -2,7 +2,7 @@ const db = require("../databases/db");
 
 const shoeManufacturerController = {
   getById(req, res) {
-    const id = req.params.id;
+    const id = req.query.id;
 
     db.query(
       "SELECT * FROM shoe_manufacturer WHERE id = ?",
@@ -48,7 +48,11 @@ const shoeManufacturerController = {
           res.status(500).json(data);
           return;
         }
-        const total = countResult[0].total || 0;
+        let total = 1;
+        if (countResult.length > 0) {
+          total = countResult[0].total < 1 ? 1 : countResult[0].total;
+        }
+        // const total = countResult[0].total || 0;
         const totalPages = Math.ceil(total / step);
         db.query(
           `SELECT * FROM shoe_manufacturer where name like 
@@ -126,7 +130,7 @@ const shoeManufacturerController = {
   },
 
   delete(req, res) {
-    const id = req.params.id;
+    const id = req.body.id;
     db.query(
       "DELETE FROM shoe_manufacturer WHERE id = ?",
       [id],

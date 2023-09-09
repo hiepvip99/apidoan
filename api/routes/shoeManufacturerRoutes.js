@@ -7,7 +7,7 @@ const shoeManufacturerController = require("../controllers/shoeManufacturerContr
 router.get("/shoeManufacturers", shoeManufacturerController.getAll);
 
 // Định nghĩa route GET /shoeManufacturers/:id
-router.get("/shoeManufacturers/:id", shoeManufacturerController.getById);
+router.get("/get_by_id", shoeManufacturerController.getById);
 
 // Định nghĩa route POST /shoeManufacturers
 router.post("/shoeManufacturers", shoeManufacturerController.add);
@@ -16,6 +16,6 @@ router.post("/shoeManufacturers", shoeManufacturerController.add);
 router.put("/shoeManufacturers", shoeManufacturerController.update);
 
 // Định nghĩa route DELETE /shoeManufacturers/:id
-router.delete("/shoeManufacturers/:id", shoeManufacturerController.delete);
+router.delete("/shoeManufacturers", shoeManufacturerController.delete);
 
 module.exports = router;
