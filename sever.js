@@ -1,10 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const multer = require("multer");
+const cors = require("cors");
 const app = express();
 
 // Middleware
 app.use(bodyParser.json());
+app.use(cors());
 
 // Import routes
 const authRoutes = require("./api/routes/auth");
@@ -29,6 +30,13 @@ app.use("/api/decentralization", shoeDecentralizationRoutes);
 app.use("/api/manufacturer", shoeManufacturerRoutes);
 app.use("/api/product", shoeProductRoutes);
 app.use("/api/order", shoeOrderRoutes);
+
+app.get("/api/image/:imageName", (req, res) => {
+  const imageName = req.params.imageName;
+  const imagePath = `uploads/${imageName}`;
+
+  res.sendFile(imagePath, { root: __dirname });
+});
 
 // Start the server
 app.listen(3000, () => {
