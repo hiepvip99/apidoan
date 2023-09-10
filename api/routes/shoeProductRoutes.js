@@ -10,7 +10,7 @@ const shoeProductController = require("../controllers/shoeProductController");
 router.get("/shoeProducts", shoeProductController.getAllProduct);
 
 // Định nghĩa route GET /shoeProducts/:id
-router.get("/shoeProducts/:id", shoeProductController.getById);
+router.get("/shoeProducts", shoeProductController.getById);
 
 // Định nghĩa route POST /shoeProducts
 router.post("/shoeProducts", /* upload.array('images') , */shoeProductController.addProduct);
@@ -21,6 +21,8 @@ router.post("/shoeProducts", /* upload.array('images') , */shoeProductController
 // router.put("/shoeProducts", shoeProductController.updateP);
 
 // Định nghĩa route DELETE /shoeProducts/:id
-router.delete("/shoeProducts/:id", shoeProductController.delete);
+router.delete("/shoeProducts", shoeProductController.delete);
+
+router.put("/uploadImage", shoeProductController.updateImageProduct);
 
 module.exports = router;
