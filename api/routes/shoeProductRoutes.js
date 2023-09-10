@@ -29,4 +29,12 @@ router.put("/updateColor", shoeProductController.updateProductColor);
 
 router.put("/updateSize", shoeProductController.updateProductSize);
 
+router.delete("/deleteColor", shoeProductController.deleteProductColor);
+
+router.delete("/deleteSize", shoeProductController.deleteProductSize);
+
+router.post("/createColor", shoeProductController.createProductColor);
+
+router.post("/createSize", shoeProductController.createProductSize);
+
 module.exports = router;

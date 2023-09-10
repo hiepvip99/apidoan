@@ -777,7 +777,7 @@ const shoeProductController = {
   },
 
   updateProductColor(req, res) {
-    const { id, productId, colorId, price} = req.body;
+    const { id, productId, colorId, price } = req.body;
 
     // Kiểm tra nếu id không được cung cấp
     if (!id) {
@@ -800,6 +800,154 @@ const shoeProductController = {
         res
           .status(200)
           .json({ message: "Cập nhật thông tin màu sắc thành công" });
+      }
+    });
+  },
+
+  deleteProductSize(req, res) {
+    const { colorId, sizeId, productId } = req.query;
+
+    // Kiểm tra nếu colorId, sizeId hoặc productId không được cung cấp
+    if (!colorId || !sizeId || !productId) {
+      res
+        .status(400)
+        .json({ error: "Thiếu thông tin colorId, sizeId hoặc productId" });
+      return;
+    }
+
+    // Truy vấn xóa thông tin kích thước sản phẩm
+    const deleteProductSizeQuery = `DELETE FROM shoe_product_size 
+    WHERE color_id = ${colorId} AND size_id = ${sizeId} AND product_id = ${productId}`;
+
+    db.query(deleteProductSizeQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi xóa thông tin kích thước: ", err);
+        res.status(500).json({ error: "Lỗi xóa thông tin kích thước" });
+      } else {
+        res
+          .status(200)
+          .json({ message: "Xóa thông tin kích thước thành công" });
+      }
+    });
+  },
+
+  deleteProductColor(req, res) {
+    const { productId, colorId } = req.query;
+
+    // Kiểm tra nếu productId hoặc colorId không được cung cấp
+    if (!productId || !colorId) {
+      res.status(400).json({ error: "Thiếu thông tin productId hoặc colorId" });
+      return;
+    }
+
+    // Truy vấn xóa thông tin màu sắc sản phẩm
+    const deleteProductColorQuery = `DELETE FROM shoe_product_colors 
+    WHERE product_id = ${productId} AND color_id = ${colorId}`;
+
+    db.query(deleteProductColorQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi xóa thông tin màu sắc: ", err);
+        res.status(500).json({ error: "Lỗi xóa thông tin màu sắc" });
+      } else {
+        res.status(200).json({ message: "Xóa thông tin màu sắc thành công" });
+      }
+    });
+  },
+
+  deleteProductSize(req, res) {
+    const { colorId, sizeId, productId } = req.query;
+
+    // Kiểm tra nếu colorId, sizeId hoặc productId không được cung cấp
+    if (!colorId || !sizeId || !productId) {
+      res
+        .status(400)
+        .json({ error: "Thiếu thông tin colorId, sizeId hoặc productId" });
+      return;
+    }
+
+    // Truy vấn xóa thông tin kích thước sản phẩm
+    const deleteProductSizeQuery = `DELETE FROM shoe_product_size 
+    WHERE color_id = ${colorId} AND size_id = ${sizeId} AND product_id = ${productId}`;
+
+    db.query(deleteProductSizeQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi xóa thông tin kích thước: ", err);
+        res.status(500).json({ error: "Lỗi xóa thông tin kích thước" });
+      } else {
+        res
+          .status(200)
+          .json({ message: "Xóa thông tin kích thước thành công" });
+      }
+    });
+  },
+
+  deleteProductColor(req, res) {
+    const { productId, colorId } = req.query;
+
+    // Kiểm tra nếu productId hoặc colorId không được cung cấp
+    if (!productId || !colorId) {
+      res.status(400).json({ error: "Thiếu thông tin productId hoặc colorId" });
+      return;
+    }
+
+    // Truy vấn xóa thông tin màu sắc sản phẩm
+    const deleteProductColorQuery = `DELETE FROM shoe_product_colors 
+    WHERE product_id = ${productId} AND color_id = ${colorId}`;
+
+    db.query(deleteProductColorQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi xóa thông tin màu sắc: ", err);
+        res.status(500).json({ error: "Lỗi xóa thông tin màu sắc" });
+      } else {
+        res.status(200).json({ message: "Xóa thông tin màu sắc thành công" });
+      }
+    });
+  },
+
+  createProductSize(req, res) {
+    const { productId, sizeId, colorId, quantity } = req.body;
+
+    // Kiểm tra nếu thiếu thông tin
+    if (!productId || !sizeId || !colorId || !quantity) {
+      res.status(400).json({ error: "Thiếu thông tin cần thiết" });
+      return;
+    }
+
+    // Truy vấn thêm thông tin kích thước sản phẩm
+    const insertProductSizeQuery = `INSERT INTO shoe_product_size (product_id, size_id, color_id, quantity) 
+    VALUES (${productId}, ${sizeId}, ${colorId}, ${quantity})`;
+
+    db.query(insertProductSizeQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi thêm thông tin kích thước: ", err);
+        res.status(500).json({ error: "Lỗi thêm thông tin kích thước" });
+      } else {
+        res
+          .status(200)
+          .json({ message: "Thêm thông tin kích thước thành công" });
+      }
+    });
+  },
+
+  createProductColor(req, res) {
+    const { productId, colorId, price, images } = req.body;
+
+    // Kiểm tra nếu thiếu thông tin
+    if (!productId || !colorId || !price || !images) {
+      res.status(400).json({ error: "Thiếu thông tin cần thiết" });
+      return;
+    }
+
+    // Truy vấn thêm thông tin màu sắc sản phẩm
+    const insertProductColorQuery = `INSERT INTO shoe_product_colors (product_id, color_id, price, images) 
+    VALUES (${productId}, ${colorId}, ${price}, '${JSON.stringify(images)}')`;
+
+    db.query(insertProductColorQuery, (err, result) => {
+      if (err) {
+        console.error("Lỗi thêm thông tin màu sắc: ", err);
+        res.status(500).json({ error: "Lỗi thêm thông tin màu sắc" });
+      } else {
+        res.status(200).json({ message: "Thêm thông tin màu sắc thành công" });
       }
     });
   },
