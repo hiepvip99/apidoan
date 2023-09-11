@@ -25,16 +25,16 @@ router.delete("/shoeProducts", shoeProductController.delete);
 
 router.put("/uploadImage", shoeProductController.updateImageProduct);
 
-router.put("/updateColor", shoeProductController.updateProductColor);
+router.put("/colorProduct", shoeProductController.updateProductColor);
 
-router.put("/updateSize", shoeProductController.updateProductSize);
+router.put("/sizeProduct", shoeProductController.updateProductSize);
 
-router.delete("/deleteColor", shoeProductController.deleteProductColor);
+router.delete("/colorProduct", shoeProductController.deleteProductColor);
 
-router.delete("/deleteSize", shoeProductController.deleteProductSize);
+router.delete("/sizeProduct", shoeProductController.deleteProductSize);
 
-router.post("/createColor", shoeProductController.createProductColor);
+router.post("/colorProduct", shoeProductController.createProductColor);
 
-router.post("/createSize", shoeProductController.createProductSize);
+router.post("/sizeProduct", shoeProductController.createProductSize);
 
 module.exports = router;
