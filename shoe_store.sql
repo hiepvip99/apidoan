@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th9 08, 2023 lúc 04:57 PM
+-- Thời gian đã tạo: Th9 15, 2023 lúc 11:27 AM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.0.28
 
@@ -43,7 +43,7 @@ INSERT INTO `shoe_account` (`id`, `username`, `password`, `decentralization_id`,
 (2, 'admin', 'admin1234', 1, 1),
 (3, 'user', 'user1234', 2, 1),
 (4, 'abc', 'aaaaaaaa', 2, 2),
-(8, 'testlancuoi', '12345678', 1, 1);
+(8, 'testlancuoi', '12345678', 2, 5);
 
 -- --------------------------------------------------------
 
@@ -99,7 +99,13 @@ CREATE TABLE `shoe_category` (
 
 INSERT INTO `shoe_category` (`id`, `name`) VALUES
 (1, 'Giầy thể thao'),
-(5, 'Giầy khiêu vũ');
+(5, 'Giầy khiêu vũ'),
+(7, 'Giầy cao gót'),
+(8, 'Giầy lười'),
+(9, 'Giầy tây'),
+(10, 'Dép nam'),
+(11, 'Giầy sapo'),
+(12, 'Giày boot');
 
 -- --------------------------------------------------------
 
@@ -133,7 +139,7 @@ CREATE TABLE `shoe_customer` (
   `date_of_birth` date NOT NULL,
   `email` varchar(255) DEFAULT NULL,
   `id_account` int(11) NOT NULL,
-  `image` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`image`))
+  `image` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -141,7 +147,7 @@ CREATE TABLE `shoe_customer` (
 --
 
 INSERT INTO `shoe_customer` (`id`, `name`, `phone_number`, `date_of_birth`, `email`, `id_account`, `image`) VALUES
-(1, 'Lê Minh Tú', '1234648979', '1996-10-11', 'leminh444@gmail.com', 3, '{     \"image_path\": \"https://jsonformatter.org/\"   }');
+(1, 'Lê Minh Tú', '1234648979', '1996-10-11', 'leminh444@gmail.com', 3, 'https://api.flutter.dev/flutter/material/DropdownButton-class.html');
 
 -- --------------------------------------------------------
 
@@ -191,15 +197,16 @@ CREATE TABLE `shoe_manufacturer` (
 INSERT INTO `shoe_manufacturer` (`id`, `name`) VALUES
 (1, 'Nike'),
 (2, 'Adidas'),
-(3, 'Adidas'),
-(4, 'vin'),
-(8, 'd'),
-(9, 'fff'),
-(10, 'ccc'),
-(11, 'sds'),
-(12, 'fss'),
-(13, 'rewrwr'),
-(14, 'fdsfsa');
+(3, 'Puma'),
+(4, 'New Balance'),
+(8, 'Converse'),
+(9, 'Reebok'),
+(10, 'Skechers'),
+(11, 'Asic'),
+(12, 'Supreme'),
+(13, 'Valentino'),
+(14, 'Balenciaga'),
+(15, 'Vans');
 
 -- --------------------------------------------------------
 
@@ -273,7 +280,10 @@ CREATE TABLE `shoe_product` (
 --
 
 INSERT INTO `shoe_product` (`id`, `name`, `manufacturer_id`, `category_id`, `gender`) VALUES
-(1, 'Nike InfinityRN 4', 1, 1, 'Nam');
+(1, 'Nike InfinityRN 4', 1, 1, 'Nam'),
+(15, 'giày chạy bộ Nike_12LF', 1, 1, 'Nam'),
+(18, 'Vans Shoe01', 15, 1, 'Nữ'),
+(19, 'test them giay', 3, 5, 'Nam');
 
 -- --------------------------------------------------------
 
@@ -294,8 +304,10 @@ CREATE TABLE `shoe_product_colors` (
 --
 
 INSERT INTO `shoe_product_colors` (`id`, `product_id`, `color_id`, `price`, `images`) VALUES
-(1, 1, 1, 500000, '[   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   },   {     \"image_path\": \"https://jsonformatter.org/\"   } ]'),
-(2, 1, 2, 600000, '');
+(1, 1, 1, 500000, '[\"api/image/1694354726252-172682698.png\"]'),
+(2, 1, 2, 600000, '[\"api/image/1694354726252-172682698.png\"]'),
+(3, 15, 1, 600000, '[\"api/image/1694354726241-940561341.png\",\"api/image/1694354726252-172682698.png\"]'),
+(4, 15, 2, 650000, '[\"api/image/1694354726252-172682698.png\"]');
 
 -- --------------------------------------------------------
 
@@ -317,7 +329,9 @@ CREATE TABLE `shoe_product_size` (
 
 INSERT INTO `shoe_product_size` (`product_size_id`, `product_id`, `size_id`, `color_id`, `quantity`) VALUES
 (1, 1, 1, 1, 20),
-(2, 1, 2, 2, 30);
+(2, 1, 2, 2, 30),
+(3, 15, 1, 1, 15),
+(4, 15, 2, 2, 20);
 
 -- --------------------------------------------------------
 
@@ -341,7 +355,15 @@ INSERT INTO `shoe_size` (`id`, `name`) VALUES
 (4, '41'),
 (5, '42'),
 (6, '43'),
-(7, '44');
+(7, '44'),
+(8, '37'),
+(9, '36'),
+(10, '35'),
+(11, '34'),
+(12, '45'),
+(13, '46'),
+(14, '47'),
+(15, '48');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -470,7 +492,7 @@ ALTER TABLE `shoe_size`
 -- AUTO_INCREMENT cho bảng `shoe_account`
 --
 ALTER TABLE `shoe_account`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_account_status`
@@ -488,7 +510,7 @@ ALTER TABLE `shoe_cart`
 -- AUTO_INCREMENT cho bảng `shoe_category`
 --
 ALTER TABLE `shoe_category`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_color`
@@ -518,7 +540,7 @@ ALTER TABLE `shoe_image`
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order`
@@ -542,25 +564,25 @@ ALTER TABLE `shoe_order_status`
 -- AUTO_INCREMENT cho bảng `shoe_product`
 --
 ALTER TABLE `shoe_product`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_product_colors`
 --
 ALTER TABLE `shoe_product_colors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_product_size`
 --
 ALTER TABLE `shoe_product_size`
-  MODIFY `product_size_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `product_size_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_size`
 --
 ALTER TABLE `shoe_size`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
