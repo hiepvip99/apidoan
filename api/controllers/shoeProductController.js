@@ -636,22 +636,45 @@ const shoeProductController = {
         } else {
         }
         // Tạo mảng chứa các truy vấn để cập nhật thông tin màu sắc trong bảng `shoe_product_colors`
+
+        db.query(
+          `DELETE FROM shoe_product_colors WHERE product_id = ${id};`,
+          (err) => {
+            if (err) {
+              console.error("Lỗi cập nhật thông tin màu sắc: ", err);
+            }
+          }
+        );
+
         const updateColorQueries = product_color.map((color) => {
+          const images = JSON.stringify(color.images); // Chuyển đổi images thành chuỗi JSON
+
           return `
-          UPDATE shoe_product_colors
-          SET price = ${color.price}
-          WHERE product_id = ${id} AND color_id = ${color.color_id}
+          INSERT INTO shoe_product_colors (product_id, color_id, price, images)
+          VALUES (${id}, ${color.color_id}, ${color.price}, '${images}')
+          ON DUPLICATE KEY UPDATE images = '${images}';
         `;
         });
 
+        // const updateColorQueries = product_color.map((color) => {
+        //   return `
+        //   UPDATE shoe_product_colors
+        //   SET price = ${color.price}
+        //   WHERE product_id = ${id} AND color_id = ${color.color_id}
+        // `;
+        // });
+
         // Thực hiện lần lượt các truy vấn cập nhật thông tin màu sắc
         updateColorQueries.forEach((query) => {
+          console.log("query color: ", query);
           db.query(query, (err) => {
             if (err) {
               console.error("Lỗi cập nhật thông tin màu sắc: ", err);
             }
           });
         });
+
+        
 
         if (!product_size || product_size.length === 0) {
           // Nếu không có thông tin về kích cỡ, trả về kết quả thành công
@@ -662,14 +685,32 @@ const shoeProductController = {
           return res.status(200).json(data);
         }
 
+        db.query(
+          `DELETE FROM shoe_product_size WHERE product_id = ${id};`,
+          (err) => {
+            if (err) {
+              console.error("Lỗi cập nhật thông tin màu sắc: ", err);
+            }
+          }
+        );
+
         // Tạo mảng chứa các truy vấn để cập nhật thông tin kích cỡ trong bảng `shoe_product_size`
+    
         const updateSizeQueries = product_size.map((size) => {
           return `
-      UPDATE shoe_product_size
-      SET quantity = ${size.quantity}
-      WHERE product_id = ${id} AND size_id = ${size.size_id} AND color_id = ${size.color_id}
-    `;
+          INSERT INTO shoe_product_size (product_id, size_id, color_id, quantity)
+          VALUES (${id}, ${size.size_id}, ${size.color_id}, ${size.quantity})
+          ON DUPLICATE KEY UPDATE quantity = ${size.quantity};
+        `;
         });
+    
+        //     const updateSizeQueries = product_size.map((size) => {
+    //       return `
+    //   UPDATE shoe_product_size
+    //   SET quantity = ${size.quantity}
+    //   WHERE product_id = ${id} AND size_id = ${size.size_id} AND color_id = ${size.color_id}
+    // `;
+    //     });
 
         // Thực hiện lần lượt các truy vấn cập nhật thông tin kích cỡ
         updateSizeQueries.forEach((query) => {
@@ -688,7 +729,6 @@ const shoeProductController = {
       }
     });
 
-    
     // res.json({ success: true });
   },
 
