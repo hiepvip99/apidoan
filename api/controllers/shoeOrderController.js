@@ -153,16 +153,28 @@ const shoeOrderController = {
         // Truy vấn tất cả các đơn hàng từ bảng `shoe_order`
         const getAllOrdersQuery = `
     SELECT *
-    FROM shoe_order WHERE order_date LIKE '%${date}%''
+    FROM shoe_order WHERE order_date LIKE '%${date}%'
   `;
 
         db.query(getAllOrdersQuery, (err, orderResults) => {
           if (err) {
             console.error("Lỗi truy vấn dữ liệu đơn hàng: ", err);
-            res.status(500).json({ error: "Lỗi truy vấn dữ liệu đơn hàng" });
+            const data = {
+              status: 500,
+              error: true,
+              detail: "Lỗi truy vấn dữ liệu đơn hàng",
+            };
+            res.status(500).json(data);
+            // res.status(500).json({ error: "Lỗi truy vấn dữ liệu đơn hàng" });
           } else {
             if (orderResults.length === 0) {
-              res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+              const data = {
+                status: 404,
+                error: true,
+                detail: "Không tìm thấy đơn hàng",
+              };
+              res.status(404).json(data);
+              // res.status(404).json({ error: "Không tìm thấy đơn hàng" });
             } else {
               // Tạo mảng chứa thông tin tất cả các đơn hàng
               const orders = orderResults.map((order) => {
