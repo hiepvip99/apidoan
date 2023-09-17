@@ -647,7 +647,10 @@ const shoeProductController = {
         );
 
         const updateColorQueries = product_color.map((color) => {
-          const images = JSON.stringify(color.images); // Chuyển đổi images thành chuỗi JSON
+          let images = null;
+          if (!color.images || color.images != undefined) {
+            images = JSON.stringify(color.images); // Chuyển đổi images thành chuỗi JSON
+          }
 
           return `
           INSERT INTO shoe_product_colors (product_id, color_id, price, images)

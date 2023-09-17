@@ -3,7 +3,7 @@ const db = require("../databases/db");
 
 // Controller để lấy danh sách tất cả các màu giày
 function getAllShoeColors(req, res) {
-  const query = 'SELECT * FROM shoe_color';
+  const query = 'SELECT * FROM shoe_color ORDER BY name ASC';
   // console.log("vao all");
   // Thực hiện truy vấn
   db.query(query, (error, results) => {

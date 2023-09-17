@@ -1,7 +1,7 @@
 const db = require("../databases/db");
 
 function getAllShoeSizes(req, res) {
-  const query = "SELECT * FROM shoe_size";
+  const query = "SELECT * FROM shoe_size ORDER BY name ASC";
 
   db.query(query, (error, results) => {
     if (error) {
