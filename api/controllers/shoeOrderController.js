@@ -2,7 +2,7 @@ const db = require("../databases/db");
 
 const shoeOrderController = {
   getById(req, res) {
-    const id = req.params.id;
+    const id = req.query.id;
 
     // Truy vấn thông tin đơn hàng từ bảng `shoe_order`
     const getOrderQuery = `
@@ -13,11 +13,23 @@ const shoeOrderController = {
 
     db.query(getOrderQuery, (err, orderResults) => {
       if (err) {
+        const data = {
+          status: 500,
+          error: true,
+          detail: "Lỗi truy vấn dữ liệu đơn hàng",
+        };
         console.error("Lỗi truy vấn dữ liệu đơn hàng: ", err);
-        res.status(500).json({ error: "Lỗi truy vấn dữ liệu đơn hàng" });
+        res.status(500).json(data);
+        // res.status(500).json({ error: "Lỗi truy vấn dữ liệu đơn hàng" });
       } else {
         if (orderResults.length === 0) {
-          res.status(404).json({ error: "Không tìm thấy đơn hàng" });
+          const data = {
+            status: 404,
+            error: true,
+            detail: "Không tìm thấy đơn hàng",
+          };
+          res.status(404).json(data);
+          // res.status(404).json({ error: "Không tìm thấy đơn hàng" });
         } else {
           const order = orderResults[0];
 
@@ -31,9 +43,15 @@ const shoeOrderController = {
           db.query(getOrderDetailQuery, (err, detailResults) => {
             if (err) {
               console.error("Lỗi truy vấn dữ liệu chi tiết đơn hàng: ", err);
-              res
-                .status(500)
-                .json({ error: "Lỗi truy vấn dữ liệu chi tiết đơn hàng" });
+              // res
+              //   .status(500)
+              //   .json({ error: "Lỗi truy vấn dữ liệu chi tiết đơn hàng" });
+              const data = {
+                status: 500,
+                error: true,
+                detail: "Lỗi truy vấn dữ liệu chi tiết đơn hàng",
+              };
+              res.status(500).json(data);
             } else {
               const orderDetails = detailResults.map((detail) => ({
                 id: detail.id,
@@ -44,21 +62,37 @@ const shoeOrderController = {
                 quantity: detail.quantity,
               }));
 
-              // Tạo đối tượng chứa thông tin đơn hàng và danh sách chi tiết đơn hàng
-              const orderWithDetails = {
-                order: {
-                  id: order.id,
-                  account_id: order.account_id,
-                  order_date: order.order_date,
-                  total_price: order.total_price,
-                  status: order.status,
-                  total_quantity: order.total_quantity,
-                },
-                details: orderDetails,
-              };
+              db.query(
+                `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
+                (err, customerResult) => {
+                  if (err) {
+                    console.log("err customerResult in order:", err);
+                  }
+                  let customer;
+                  if (customerResult.length > 0) {
+                    customer = customerResult[0];
+                  }
+                  // Tạo đối tượng chứa thông tin đơn hàng và danh sách chi tiết đơn hàng
+                  const orderWithDetails = {
+                    status: 200,
+                    object: {
+                      id: order.id,
+                      // account_id: order.account_id,
+                      customerInfo: customer,
+                      order_date: order.order_date,
+                      total_price: order.total_price,
+                      status_id: order.status_id,
+                      payment_methods: order.payment_methods,
+                      total_quantity: order.total_quantity,
+                      delivery_address: order.delivery_address,
+                    },
+                    details: orderDetails,
+                  };
 
-              // Trả về kết quả
-              res.json(orderWithDetails);
+                  // Trả về kết quả
+                  res.status(200).json(orderWithDetails);
+                }
+              );
             }
           });
         }
@@ -131,9 +165,10 @@ const shoeOrderController = {
     const step = req.query.step || 10;
     const offset = (page - 1) * step;
     const date = req.query.date || "";
+    const account_id = req.query.account_id || "";
     console.log("date:", date);
     db.query(
-      `SELECT COUNT(*) AS total FROM shoe_order WHERE order_date LIKE '%${date}%'`,
+      `SELECT COUNT(*) AS total FROM shoe_order WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'`,
       (err, countResult) => {
         if (err) {
           console.error("Error executing MySQL query:", err);
@@ -153,7 +188,7 @@ const shoeOrderController = {
         // Truy vấn tất cả các đơn hàng từ bảng `shoe_order`
         const getAllOrdersQuery = `
     SELECT *
-    FROM shoe_order WHERE order_date LIKE '%${date}%'
+    FROM shoe_order WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'
   `;
 
         db.query(getAllOrdersQuery, (err, orderResults) => {
@@ -203,35 +238,91 @@ const shoeOrderController = {
                         quantity: detail.quantity,
                       }));
 
-                      resolve({
-                        id: order.id,
-                        account_id: order.account_id,
-                        order_date: order.order_date,
-                        total_price: order.total_price,
-                        status: order.status,
-                        total_quantity: order.total_quantity,
-                        details: orderDetails,
-                      });
+
+                      db.query(
+                        `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
+                        (err, customerResult) => {
+                          if (err) {
+                            console.log(
+                              "Error retrieving customer information:",
+                              err
+                            );
+                          }
+
+                          let customer = null;
+                          if (customerResult.length > 0) {
+                            customer = customerResult[0];
+                            customer.address = JSON.parse(customer.address);
+                          }
+
+                          resolve({
+                            id: order.id,
+                            customerInfo: customer,
+                            order_date: order.order_date,
+                            total_price: order.total_price,
+                            status_id: order.status_id,
+                            payment_methods: order.payment_methods,
+                            total_quantity: order.total_quantity,
+                            delivery_address: order.delivery_address,
+                            details: orderDetails,
+                          });
+                        }
+                      );
+                      
+                      // db.query(
+                      //   `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
+                      //   (err, customerResult) => {
+                      //     if (err) {
+                      //       console.log("err customerResult in order:", err);
+                      //     }
+
+                      //     let customer = null;
+                      //     if (customerResult.length > 0) {
+                      //       customer = customerResult[0];
+                      //     }
+
+                      //     resolve({
+                      //       id: order.id,
+                      //       // account_id: order.account_id,
+                      //       customerInfo: customer,
+                      //       order_date: order.order_date,
+                      //       total_price: order.total_price,
+                      //       status_id: order.status_id,
+                      //       payment_methods: order.payment_methods,
+                      //       total_quantity: order.total_quantity,
+                      //       details: orderDetails,
+                      //     });
+                      //   }
+                      // );
                     }
                   });
                 });
               });
 
-              Promise.all(orders)
-                .then((orderData) => {
-                  // Trả về kết quả
-                  const data = {
-                    currentPage: parseInt(page),
-                    step: parseInt(step),
-                    totalPages: totalPages,
-                    data: orderData,
-                  };
-                  res.status(200).json(data);
-                  // res.json(orderData);
-                })
-                .catch((error) => {
-                  res.status(500).json({ error });
-                });
+              db.query(
+                `SELECT * FROM shoe_order_status`,
+                (err, statusResult) => {
+                  if (err) {
+                    return;
+                  }
+                  Promise.all(orders)
+                    .then((orderData) => {
+                      // Trả về kết quả
+                      const data = {
+                        currentPage: parseInt(page),
+                        step: parseInt(step),
+                        totalPages: totalPages,
+                        data: orderData,
+                        statusObj: statusResult,
+                      };
+                      res.status(200).json(data);
+                      // res.json(orderData);
+                    })
+                    .catch((error) => {
+                      res.status(500).json({ error });
+                    });
+                }
+              );
             }
           }
         });
@@ -244,8 +335,9 @@ const shoeOrderController = {
       account_id,
       order_date,
       total_price,
-      status,
+      status_id,
       total_quantity,
+      payment_methods,
       order_details,
     } = req.body;
 
@@ -254,7 +346,8 @@ const shoeOrderController = {
       !account_id ||
       !order_date ||
       !total_price ||
-      !status ||
+      !status_id ||
+      !payment_methods ||
       !total_quantity
     ) {
       res.status(400).json({ error: "Thiếu thông tin bắt buộc của đơn hàng" });
@@ -263,8 +356,8 @@ const shoeOrderController = {
 
     // Tạo truy vấn để thêm đơn hàng mới vào bảng `shoe_order`
     const addOrderQuery = `
-    INSERT INTO shoe_order (account_id, order_date, total_price, status, total_quantity)
-    VALUES (${account_id}, '${order_date}', ${total_price}, ${status}, ${total_quantity})
+    INSERT INTO shoe_order (account_id, order_date, total_price, status_id, total_quantity, payment_methods)
+    VALUES (${account_id}, '${order_date}', ${total_price}, ${status_id}, ${total_quantity}, '${payment_methods}')
   `;
 
     db.query(addOrderQuery, (err, orderResult) => {
@@ -299,7 +392,11 @@ const shoeOrderController = {
         });
 
         // Trả về ID của đơn hàng mới
-        res.json({ id: newOrderId });
+        const data = {
+          status: 200,
+        };
+        res.status(200).json(data);
+        // res.json({ id: newOrderId });
       }
     });
   },
@@ -355,11 +452,11 @@ const shoeOrderController = {
   // },
 
   statusChange(req, res) {
-    const id = req.query.id;
-    const status = req.query.status;
+    const id = req.body.id;
+    const status_id = req.body.status_id;
     db.query(
-      "UPDATE shoe_order SET status = ? WHERE id = ?",
-      [status, id],
+      "UPDATE shoe_order SET status_id = ? WHERE id = ?",
+      [status_id, id],
       (err, results) => {
         if (err) {
           console.error("Error executing MySQL query:", err);

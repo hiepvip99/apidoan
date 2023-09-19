@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th9 15, 2023 lúc 11:27 AM
+-- Thời gian đã tạo: Th9 17, 2023 lúc 03:59 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.0.28
 
@@ -220,8 +220,18 @@ CREATE TABLE `shoe_order` (
   `order_date` datetime NOT NULL,
   `total_price` int(11) NOT NULL,
   `status_id` int(11) NOT NULL,
-  `total_quantity` int(11) NOT NULL
+  `total_quantity` int(11) NOT NULL,
+  `payment_methods` varchar(255) NOT NULL DEFAULT 'Thanh toán khi nhận hàng'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_order`
+--
+
+INSERT INTO `shoe_order` (`id`, `account_id`, `order_date`, `total_price`, `status_id`, `total_quantity`, `payment_methods`) VALUES
+(2, 2, '2023-09-17 20:31:36', 1700000, 1, 3, 'Thanh toán khi nhận hàng'),
+(3, 2, '0000-00-00 00:00:00', 1700000, 1, 3, 'Thanh toán khi nhận hàng'),
+(4, 2, '2023-09-17 20:31:36', 1700000, 1, 3, 'Thanh toán khi nhận hàng');
 
 -- --------------------------------------------------------
 
@@ -254,12 +264,14 @@ CREATE TABLE `shoe_order_status` (
 --
 
 INSERT INTO `shoe_order_status` (`id`, `name`) VALUES
-(1, 'Chờ xác nhận'),
-(2, 'Chờ vận chuyển'),
-(3, 'Đang giao'),
-(4, 'Đã giao'),
-(5, 'Đã hủy'),
-(6, 'Trả hàng');
+(1, 'Chưa thanh toán'),
+(2, 'Đã thanh toán'),
+(3, 'Chờ xác nhận'),
+(4, 'Chờ vận chuyển'),
+(5, 'Đang giao'),
+(6, 'Đã giao'),
+(7, 'Đã hủy'),
+(8, 'Trả hàng');
 
 -- --------------------------------------------------------
 
@@ -292,22 +304,25 @@ INSERT INTO `shoe_product` (`id`, `name`, `manufacturer_id`, `category_id`, `gen
 --
 
 CREATE TABLE `shoe_product_colors` (
-  `id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `color_id` int(11) NOT NULL,
   `price` int(11) NOT NULL,
-  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`images`))
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_product_colors`
 --
 
-INSERT INTO `shoe_product_colors` (`id`, `product_id`, `color_id`, `price`, `images`) VALUES
-(1, 1, 1, 500000, '[\"api/image/1694354726252-172682698.png\"]'),
-(2, 1, 2, 600000, '[\"api/image/1694354726252-172682698.png\"]'),
-(3, 15, 1, 600000, '[\"api/image/1694354726241-940561341.png\",\"api/image/1694354726252-172682698.png\"]'),
-(4, 15, 2, 650000, '[\"api/image/1694354726252-172682698.png\"]');
+INSERT INTO `shoe_product_colors` (`product_id`, `color_id`, `price`, `images`) VALUES
+(1, 1, 500000, '[\"api/image/1694790277767-517884376.png\",\"api/image/1694790277779-139123565.png\"]'),
+(1, 2, 600000, '[\"api/image/1694790277767-517884376.png\",\"api/image/1694790277779-139123565.png\"]'),
+(15, 1, 600000, '[\"api/image/1694790277767-517884376.png\",\"api/image/1694790277779-139123565.png\"]'),
+(15, 2, 650000, '[]'),
+(18, 1, 99999, '[\"api/image/1694942674470-546520913.png\",\"api/image/1694942674472-181043581.png\",\"api/image/1694942674485-430836773.png\",\"api/image/1694942674498-316670545.png\",\"api/image/1694942674511-288640912.png\",\"api/image/1694942674515-331472194.png\"]'),
+(18, 2, 99999, '[\"api/image/1694942847420-212597271.png\",\"api/image/1694942847421-587047810.png\"]'),
+(19, 1, 500000, '[\"api/image/1694942649716-30142067.png\"]'),
+(19, 2, 600000, NULL);
 
 -- --------------------------------------------------------
 
@@ -316,7 +331,6 @@ INSERT INTO `shoe_product_colors` (`id`, `product_id`, `color_id`, `price`, `ima
 --
 
 CREATE TABLE `shoe_product_size` (
-  `product_size_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
   `size_id` int(11) NOT NULL,
   `color_id` int(11) NOT NULL,
@@ -327,11 +341,19 @@ CREATE TABLE `shoe_product_size` (
 -- Đang đổ dữ liệu cho bảng `shoe_product_size`
 --
 
-INSERT INTO `shoe_product_size` (`product_size_id`, `product_id`, `size_id`, `color_id`, `quantity`) VALUES
-(1, 1, 1, 1, 20),
-(2, 1, 2, 2, 30),
-(3, 15, 1, 1, 15),
-(4, 15, 2, 2, 20);
+INSERT INTO `shoe_product_size` (`product_id`, `size_id`, `color_id`, `quantity`) VALUES
+(1, 1, 1, 20),
+(1, 2, 1, 66),
+(1, 1, 2, 55),
+(1, 2, 2, 30),
+(15, 1, 1, 15),
+(15, 2, 1, 40),
+(15, 1, 2, 35),
+(15, 2, 2, 20),
+(18, 1, 1, 99),
+(18, 1, 2, 60),
+(19, 1, 1, 20),
+(19, 1, 2, 22);
 
 -- --------------------------------------------------------
 
@@ -465,17 +487,15 @@ ALTER TABLE `shoe_product`
 -- Chỉ mục cho bảng `shoe_product_colors`
 --
 ALTER TABLE `shoe_product_colors`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `product_colors_ibfk_2` (`color_id`),
-  ADD KEY `fk_product_id` (`product_id`);
+  ADD UNIQUE KEY `unique_product_color` (`product_id`,`color_id`),
+  ADD KEY `product_colors_ibfk_2` (`color_id`);
 
 --
 -- Chỉ mục cho bảng `shoe_product_size`
 --
 ALTER TABLE `shoe_product_size`
-  ADD PRIMARY KEY (`product_size_id`),
+  ADD UNIQUE KEY `unique_product_color_size` (`product_id`,`color_id`,`size_id`),
   ADD KEY `size_id` (`size_id`),
-  ADD KEY `fk_product_id_size` (`product_id`),
   ADD KEY `color_id` (`color_id`);
 
 --
@@ -546,7 +566,7 @@ ALTER TABLE `shoe_manufacturer`
 -- AUTO_INCREMENT cho bảng `shoe_order`
 --
 ALTER TABLE `shoe_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order_detail`
@@ -558,25 +578,13 @@ ALTER TABLE `shoe_order_detail`
 -- AUTO_INCREMENT cho bảng `shoe_order_status`
 --
 ALTER TABLE `shoe_order_status`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_product`
 --
 ALTER TABLE `shoe_product`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
-
---
--- AUTO_INCREMENT cho bảng `shoe_product_colors`
---
-ALTER TABLE `shoe_product_colors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
---
--- AUTO_INCREMENT cho bảng `shoe_product_size`
---
-ALTER TABLE `shoe_product_size`
-  MODIFY `product_size_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_size`

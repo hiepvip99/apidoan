@@ -7,7 +7,7 @@ const shoeOrderController = require("../controllers/shoeOrderController");
 router.get("/shoeOrders", shoeOrderController.getAll);
 
 // Định nghĩa route GET /shoeOrders/:id
-router.get("/shoeOrders/:id", shoeOrderController.getById);
+router.get("/shoeOrderById", shoeOrderController.getById);
 
 // Định nghĩa route POST /shoeOrders
 router.post("/shoeOrders", shoeOrderController.add);
