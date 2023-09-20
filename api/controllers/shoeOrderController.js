@@ -619,6 +619,13 @@ const shoeOrderController = {
   statusChange(req, res) {
     const id = req.body.id;
     const status_id = req.body.status_id;
+    if (!id || !status_id) {
+      const data = {
+        status: 500,
+        detail: "Invalid id or status id",
+      }
+      return res.status(500).json(data);
+    }
     db.query(
       "UPDATE shoe_order SET status_id = ? WHERE id = ?",
       [status_id, id],
