@@ -18,6 +18,7 @@ const shoeDecentralizationRoutes = require("./api/routes/shoeDecentralizationRou
 const shoeManufacturerRoutes = require("./api/routes/shoeManufacturerRoutes");
 const shoeProductRoutes = require("./api/routes/shoeProductRoutes");
 const shoeOrderRoutes = require("./api/routes/shoeOrderRoutes");
+const shoeStatisticRoutes = require("./api/routes/statisticRoute");
 
 // Set up routes
 app.use("/api/auth", authRoutes);
@@ -30,6 +31,7 @@ app.use("/api/decentralization", shoeDecentralizationRoutes);
 app.use("/api/manufacturer", shoeManufacturerRoutes);
 app.use("/api/product", shoeProductRoutes);
 app.use("/api/order", shoeOrderRoutes);
+app.use("/api", shoeStatisticRoutes);
 
 app.get("/api/image/:imageName", (req, res) => {
   const imageName = req.params.imageName;
