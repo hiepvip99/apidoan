@@ -6,22 +6,30 @@ const shoeStatisticController = {
 
     const query = `
   SELECT
-    all_dates.day,
+    DATE(DATE_ADD(all_dates.day, INTERVAL 1 DAY)) AS day,
     COALESCE(SUM(shoe_order.total_price), 0) AS revenue
   FROM
     (
-      SELECT DATE_FORMAT('${fromday}' + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY, '%Y-%m-%d') AS day
+      SELECT DATE_ADD('${fromday}', INTERVAL ((a.a + (10 * b.a) + (100 * c.a)) - 1) DAY) AS day
       FROM
         (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
         CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
         CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
     ) AS all_dates
   LEFT JOIN
-    shoe_order ON DATE_FORMAT(all_dates.day, '%Y-%m-%d') = DATE_FORMAT(shoe_order.order_date, '%Y-%m-%d')
+    (
+      SELECT
+        DATE(order_date) AS order_date,
+        total_price
+      FROM
+        shoe_order
+    ) AS shoe_order ON DATE(all_dates.day) = DATE(shoe_order.order_date)
   WHERE
-    DATE_FORMAT(all_dates.day, '%Y-%m-%d') BETWEEN '${fromday}' AND '${today}'
+    DATE(DATE_ADD(all_dates.day, INTERVAL 1 DAY)) BETWEEN DATE_ADD('${fromday}', INTERVAL 1 DAY) AND DATE_ADD('${today}', INTERVAL 1 DAY)
   GROUP BY
-    all_dates.day;
+    DATE(DATE_ADD(all_dates.day, INTERVAL 1 DAY))
+  ORDER BY
+    DATE(DATE_ADD(all_dates.day, INTERVAL 1 DAY));
 `;
 
     db.query(query, (err, results) => {

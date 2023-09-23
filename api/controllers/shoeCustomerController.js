@@ -196,6 +196,42 @@ function getShoeCustomersByAccountId(req, res) {
   });
 }
 
+
+function getVipCustomer(req, res) {
+  const query = `
+    SELECT
+      c.id,
+      c.name,
+      c.phone_number,
+      c.date_of_birth,
+      c.email,
+      c.image
+    FROM
+      shoe_customer AS c
+    INNER JOIN (
+      SELECT
+        account_id,
+        COUNT(*) AS order_count
+      FROM
+        shoe_order
+      GROUP BY
+        account_id
+      HAVING
+        order_count >= 5
+    ) AS o ON c.id_account = o.account_id;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Lỗi truy vấn: ", err);
+      res.status(500).send("Lỗi truy vấn cơ sở dữ liệu");
+      return;
+    }
+
+    res.json(results);
+  });
+}
+
 module.exports = {
   getAllShoeCustomers,
   getShoeCustomerByIdAccount,
@@ -203,4 +239,5 @@ module.exports = {
   updateShoeCustomer,
   deleteShoeCustomer,
   getShoeCustomersByAccountId,
+  getVipCustomer,
 };
