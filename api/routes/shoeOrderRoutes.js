@@ -19,6 +19,8 @@ router.post("/shoeOrders", shoeOrderController.add);
 
 router.put("/shoeOrders/status", shoeOrderController.statusChange);
 
+router.get("/shoeOrders/status", shoeOrderController.getStatusOrder);
+
 // Định nghĩa route DELETE /shoeOrders/:id
 // router.delete("/shoeOrders/:id", shoeOrderController.delete);
 

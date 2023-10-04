@@ -231,7 +231,8 @@ const shoeOrderController = {
     const offset = (page - 1) * step;
     const date = req.query.date || "";
     const account_id = req.query.account_id || "";
-    console.log("date:", date);
+    // console.log("date:", date);
+    console.log("account_id:", account_id);
     db.query(
       `SELECT COUNT(*) AS total FROM shoe_order WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'`,
       (err, countResult) => {
@@ -276,218 +277,220 @@ const shoeOrderController = {
               res.status(404).json(data);
               // res.status(404).json({ error: "Không tìm thấy đơn hàng" });
             } else {
-          //     // Tạo mảng chứa thông tin tất cả các đơn hàng
-          //     const orders = orderResults.map((order) => {
-          //       // Truy vấn danh sách chi tiết đơn hàng từ bảng `shoe_order_detail`
-          //       const getOrderDetailQuery = `
-          //   SELECT *
-          //   FROM shoe_order_detail
-          //   WHERE order_id = ${order.id}
-          // `;
+              //     // Tạo mảng chứa thông tin tất cả các đơn hàng
+              //     const orders = orderResults.map((order) => {
+              //       // Truy vấn danh sách chi tiết đơn hàng từ bảng `shoe_order_detail`
+              //       const getOrderDetailQuery = `
+              //   SELECT *
+              //   FROM shoe_order_detail
+              //   WHERE order_id = ${order.id}
+              // `;
 
-          //       return new Promise((resolve, reject) => {
-          //         db.query(getOrderDetailQuery, (err, detailResults) => {
-          //           if (err) {
-          //             console.error(
-          //               "Lỗi truy vấn dữ liệu chi tiết đơn hàng: ",
-          //               err
-          //             );
-          //             reject("Lỗi truy vấn dữ liệu chi tiết đơn hàng");
-          //           } else {
-          //             const orderDetails = detailResults.map((detail) => ({
-          //               id: detail.id,
-          //               order_id: detail.order_id,
-          //               product_id: detail.product_id,
-          //               color_id: detail.color_id,
-          //               size_id: detail.size_id,
-          //               quantity: detail.quantity,
-          //             }));
+              //       return new Promise((resolve, reject) => {
+              //         db.query(getOrderDetailQuery, (err, detailResults) => {
+              //           if (err) {
+              //             console.error(
+              //               "Lỗi truy vấn dữ liệu chi tiết đơn hàng: ",
+              //               err
+              //             );
+              //             reject("Lỗi truy vấn dữ liệu chi tiết đơn hàng");
+              //           } else {
+              //             const orderDetails = detailResults.map((detail) => ({
+              //               id: detail.id,
+              //               order_id: detail.order_id,
+              //               product_id: detail.product_id,
+              //               color_id: detail.color_id,
+              //               size_id: detail.size_id,
+              //               quantity: detail.quantity,
+              //             }));
 
-          //             db.query(
-          //               `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
-          //               (err, customerResult) => {
-          //                 if (err) {
-          //                   console.log(
-          //                     "Error retrieving customer information:",
-          //                     err
-          //                   );
-          //                 }
+              //             db.query(
+              //               `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
+              //               (err, customerResult) => {
+              //                 if (err) {
+              //                   console.log(
+              //                     "Error retrieving customer information:",
+              //                     err
+              //                   );
+              //                 }
 
-          //                 let customer = null;
-          //                 if (customerResult.length > 0) {
-          //                   customer = customerResult[0];
-          //                   customer.address = JSON.parse(customer.address);
-          //                 }
+              //                 let customer = null;
+              //                 if (customerResult.length > 0) {
+              //                   customer = customerResult[0];
+              //                   customer.address = JSON.parse(customer.address);
+              //                 }
 
-          //                 resolve({
-          //                   id: order.id,
-          //                   customerInfo: customer,
-          //                   order_date: order.order_date,
-          //                   total_price: order.total_price,
-          //                   status_id: order.status_id,
-          //                   payment_methods: order.payment_methods,
-          //                   total_quantity: order.total_quantity,
-          //                   delivery_address: order.delivery_address,
-          //                   details: orderDetails,
-          //                 });
-          //               }
-          //             );
+              //                 resolve({
+              //                   id: order.id,
+              //                   customerInfo: customer,
+              //                   order_date: order.order_date,
+              //                   total_price: order.total_price,
+              //                   status_id: order.status_id,
+              //                   payment_methods: order.payment_methods,
+              //                   total_quantity: order.total_quantity,
+              //                   delivery_address: order.delivery_address,
+              //                   details: orderDetails,
+              //                 });
+              //               }
+              //             );
 
-          //             // db.query(
-          //             //   `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
-          //             //   (err, customerResult) => {
-          //             //     if (err) {
-          //             //       console.log("err customerResult in order:", err);
-          //             //     }
+              //             // db.query(
+              //             //   `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
+              //             //   (err, customerResult) => {
+              //             //     if (err) {
+              //             //       console.log("err customerResult in order:", err);
+              //             //     }
 
-          //             //     let customer = null;
-          //             //     if (customerResult.length > 0) {
-          //             //       customer = customerResult[0];
-          //             //     }
+              //             //     let customer = null;
+              //             //     if (customerResult.length > 0) {
+              //             //       customer = customerResult[0];
+              //             //     }
 
-          //             //     resolve({
-          //             //       id: order.id,
-          //             //       // account_id: order.account_id,
-          //             //       customerInfo: customer,
-          //             //       order_date: order.order_date,
-          //             //       total_price: order.total_price,
-          //             //       status_id: order.status_id,
-          //             //       payment_methods: order.payment_methods,
-          //             //       total_quantity: order.total_quantity,
-          //             //       details: orderDetails,
-          //             //     });
-          //             //   }
-          //             // );
-          //           }
-          //         });
-          //       });
-          //     });
+              //             //     resolve({
+              //             //       id: order.id,
+              //             //       // account_id: order.account_id,
+              //             //       customerInfo: customer,
+              //             //       order_date: order.order_date,
+              //             //       total_price: order.total_price,
+              //             //       status_id: order.status_id,
+              //             //       payment_methods: order.payment_methods,
+              //             //       total_quantity: order.total_quantity,
+              //             //       details: orderDetails,
+              //             //     });
+              //             //   }
+              //             // );
+              //           }
+              //         });
+              //       });
+              //     });
 
-          //     db.query(
-          //       `SELECT * FROM shoe_order_status`,
-          //       (err, statusResult) => {
-          //         if (err) {
-          //           return;
-          //         }
-          //         Promise.all(orders)
-          //           .then((orderData) => {
-          //             // Trả về kết quả
-          //             const data = {
-          //               currentPage: parseInt(page),
-          //               step: parseInt(step),
-          //               totalPages: totalPages,
-          //               data: orderData,
-          //               statusObj: statusResult,
-          //             };
-          //             res.status(200).json(data);
-          //             // res.json(orderData);
-          //           })
-          //           .catch((error) => {
-          //             res.status(500).json({ error });
-          //           });
-          //       }
-          //     );
-            const orders = orderResults.map((order) => {
-              const getOrderDetailQuery = `
+              //     db.query(
+              //       `SELECT * FROM shoe_order_status`,
+              //       (err, statusResult) => {
+              //         if (err) {
+              //           return;
+              //         }
+              //         Promise.all(orders)
+              //           .then((orderData) => {
+              //             // Trả về kết quả
+              //             const data = {
+              //               currentPage: parseInt(page),
+              //               step: parseInt(step),
+              //               totalPages: totalPages,
+              //               data: orderData,
+              //               statusObj: statusResult,
+              //             };
+              //             res.status(200).json(data);
+              //             // res.json(orderData);
+              //           })
+              //           .catch((error) => {
+              //             res.status(500).json({ error });
+              //           });
+              //       }
+              //     );
+              const orders = orderResults.map((order) => {
+                const getOrderDetailQuery = `
     SELECT *
     FROM shoe_order_detail
     WHERE order_id = ${order.id}
   `;
 
-              return new Promise((resolve, reject) => {
-                db.query(getOrderDetailQuery, (err, detailResults) => {
-                  if (err) {
-                    console.error(
-                      "Lỗi truy vấn dữ liệu chi tiết đơn hàng: ",
-                      err
-                    );
-                    reject("Lỗi truy vấn dữ liệu chi tiết đơn hàng");
-                  } else {
-                    const orderDetails = detailResults.map(async (detail) => {
-                      const productQuery = `SELECT * FROM shoe_product WHERE id = ${detail.product_id}`;
+                return new Promise((resolve, reject) => {
+                  db.query(getOrderDetailQuery, (err, detailResults) => {
+                    if (err) {
+                      console.error(
+                        "Lỗi truy vấn dữ liệu chi tiết đơn hàng: ",
+                        err
+                      );
+                      reject("Lỗi truy vấn dữ liệu chi tiết đơn hàng");
+                    } else {
+                      const orderDetails = detailResults.map(async (detail) => {
+                        const productQuery = `SELECT * FROM shoe_product WHERE id = ${detail.product_id}`;
 
-                      const product = await new Promise((resolve, reject) => {
-                        db.query(productQuery, (err, productResult) => {
-                          if (err) {
-                            reject(err);
-                          } else {
-                            resolve(productResult[0]);
-                          }
-                        });
-                      });
-
-                      return {
-                        id: detail.id,
-                        order_id: detail.order_id,
-                        // product_id: detail.product_id,
-                        product: product,
-                        color_id: detail.color_id,
-                        size_id: detail.size_id,
-                        quantity: detail.quantity,
-                      };
-                    });
-
-                    Promise.all(orderDetails)
-                      .then((orderDetailsWithProduct) => {
-                        db.query(
-                          `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
-                          (err, customerResult) => {
+                        const product = await new Promise((resolve, reject) => {
+                          db.query(productQuery, (err, productResult) => {
                             if (err) {
-                              console.log(
-                                "Error retrieving customer information:",
-                                err
-                              );
+                              reject(err);
+                            } else {
+                              resolve(productResult[0]);
                             }
+                          });
+                        });
 
-                            let customer = null;
-                            if (customerResult.length > 0) {
-                              customer = customerResult[0];
-                              customer.address = JSON.parse(customer.address);
-                            }
-
-                            resolve({
-                              id: order.id,
-                              customerInfo: customer,
-                              order_date: order.order_date,
-                              total_price: order.total_price,
-                              status_id: order.status_id,
-                              payment_methods: order.payment_methods,
-                              total_quantity: order.total_quantity,
-                              delivery_address: order.delivery_address,
-                              details: orderDetailsWithProduct,
-                            });
-                          }
-                        );
-                      })
-                      .catch((error) => {
-                        console.log("Error fetching product details:", error);
-                        reject("Lỗi truy vấn dữ liệu sản phẩm");
+                        return {
+                          id: detail.id,
+                          order_id: detail.order_id,
+                          // product_id: detail.product_id,
+                          product: product,
+                          color_id: detail.color_id,
+                          size_id: detail.size_id,
+                          quantity: detail.quantity,
+                        };
                       });
-                  }
+
+                      Promise.all(orderDetails)
+                        .then((orderDetailsWithProduct) => {
+                          db.query(
+                            `SELECT * FROM shoe_customer WHERE id_account = ${order.account_id}`,
+                            (err, customerResult) => {
+                              if (err) {
+                                console.log(
+                                  "Error retrieving customer information:",
+                                  err
+                                );
+                              }
+
+                              let customer = null;
+                              if (customerResult.length > 0) {
+                                customer = customerResult[0];
+                                customer.address = JSON.parse(customer.address);
+                              }
+
+                              resolve({
+                                id: order.id,
+                                customerInfo: customer,
+                                order_date: order.order_date,
+                                total_price: order.total_price,
+                                status_id: order.status_id,
+                                payment_methods: order.payment_methods,
+                                total_quantity: order.total_quantity,
+                                delivery_address: order.delivery_address,
+                                details: orderDetailsWithProduct,
+                              });
+                            }
+                          );
+                        })
+                        .catch((error) => {
+                          console.log("Error fetching product details:", error);
+                          reject("Lỗi truy vấn dữ liệu sản phẩm");
+                        });
+                    }
+                  });
                 });
               });
-            });
 
-            db.query(`SELECT * FROM shoe_order_status`, (err, statusResult) => {
-              if (err) {
-                return;
-              }
-              Promise.all(orders)
-                .then((orderData) => {
-                  const data = {
-                    currentPage: parseInt(page),
-                    step: parseInt(step),
-                    totalPages: totalPages,
-                    data: orderData,
-                    statusObj: statusResult,
-                  };
-                  res.status(200).json(data);
-                })
-                .catch((error) => {
-                  res.status(500).json({ error });
-                });
-            });
-            
+              db.query(
+                `SELECT * FROM shoe_order_status`,
+                (err, statusResult) => {
+                  if (err) {
+                    return;
+                  }
+                  Promise.all(orders)
+                    .then((orderData) => {
+                      const data = {
+                        currentPage: parseInt(page),
+                        step: parseInt(step),
+                        totalPages: totalPages,
+                        data: orderData,
+                        statusObj: statusResult,
+                      };
+                      res.status(200).json(data);
+                    })
+                    .catch((error) => {
+                      res.status(500).json({ error });
+                    });
+                }
+              );
             }
           }
         });
@@ -623,7 +626,7 @@ const shoeOrderController = {
       const data = {
         status: 500,
         detail: "Invalid id or status id",
-      }
+      };
       return res.status(500).json(data);
     }
     db.query(
@@ -645,6 +648,20 @@ const shoeOrderController = {
         res.status(200).json(data);
       }
     );
+  },
+
+  getStatusOrder(req, res) {
+    db.query(`SELECT * FROM shoe_order_status`, (err, statusResult) => {
+      if (err) {
+        console.log("err:", err);
+        return res.status(500);
+      }
+      const data = {
+        status: 200,
+        statusObj: statusResult,
+      };
+      res.status(200).json(data);
+    });
   },
 
   // delete(req, res) {
