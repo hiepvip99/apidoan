@@ -1,4 +1,5 @@
 const db = require("../databases/db");
+const { sendNotification } = require("../firebase-notification");
 
 const shoeOrderController = {
   getById(req, res) {
@@ -642,6 +643,20 @@ const shoeOrderController = {
           res.status(500).json(data);
           return;
         }
+
+        // if (status_id === ) {
+        // }
+        // Gọi hàm sendNotification
+        sendNotification(
+          "Có cập nhật mới",
+          "Đơn hàng của bạn đã có cập nhật,Vui lòng kiểm tra thông tin đơn hàng của bạn",
+          "all"
+        ).then((response) => {
+            console.log("Thông báo đã được gửi:", response);
+          })
+          .catch((error) => {
+            console.log("Lỗi khi gửi thông báo:", error);
+          });
         const data = {
           status: 200,
         };

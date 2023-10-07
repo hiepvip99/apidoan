@@ -220,49 +220,67 @@ const shoeProductController = {
     //
     const minPrice = req.query.minPrice;
     const maxPrice = req.query.maxPrice;
-    const color = req.query.color;
+    const color_id = req.query.color_id;
+    const sortBy = req.query.sortBy;
 
     let condition = `WHERE 1 = 1`;
 
     // Xây dựng câu truy vấn SQL
-    let sql = "SELECT DISTINCT product_id FROM shoe_product_colors WHERE";
+    let sql = `SELECT DISTINCT product_id FROM shoe_product_colors WHERE 1 = 1 `;
     const params = [];
 
+    if (sortBy) {
+      if (sortBy === 'price_asc') {
+        sql += `ORDER BY price ASC`;
+      }
+      if (sortBy === 'price_desc') {
+        sql += `ORDER BY price DESC`;
+      }
+    }
+
     if (minPrice) {
-      sql += " price >= ? AND";
-      params.push(parseInt(minPrice));
+      sql += `AND price >= ${minPrice} `;
+      console.log("minPrice: ", minPrice);
+      // params.push(parseInt(minPrice));
     }
 
     if (maxPrice) {
-      sql += " price <= ? AND";
-      params.push(parseInt(maxPrice));
+      sql += `AND price <= ${maxPrice} `;
+      console.log("maxPrice: ", maxPrice);
+      // sql += "AND price <= ? ";
+      // params.push(parseInt(maxPrice));
     }
 
-    if (color) {
-      sql += " color_id = ? AND";
-      params.push(parseInt(color));
+    if (color_id) {
+      sql += `AND color_id = ${color_id} `;
+      console.log("color_id: ", color_id);
+      // params.push(parseInt(color_id));
     }
 
-    sql = sql.slice(0, -4); // Xóa bỏ "AND" cuối cùng
+    // sql = sql.slice(0, -4); // Xóa bỏ "AND" cuối cùng
 
     // tạo product id
     // Thực hiện truy vấn
-    db.query(sql, params, (err, results) => {
+    db.query(sql, (err, results) => {
       if (err) {
         console.error("Lỗi truy vấn cơ sở dữ liệu: ", err);
         // res.status(500).json({ error: "Lỗi truy vấn cơ sở dữ liệu" });
         // return;
       }
 
-      const productIds = results.map((row) => row.product_id);
-      // res.json({ productIds });
-      if (productIds.length === 0) {
-        // Không có dữ liệu trong productIds
-        // res.json({ message: "Không có dữ liệu productIds" });
-        // return;
-      } else {
-        condition += ` AND id IN (${productIds.join(",")})`;
+      let productIds;
+      if (results) {
+         productIds = results.map((row) => row.product_id);
+        if (productIds.length === 0) {
+           condition += ` AND id = 'abc'`;
+           // Không có dữ liệu trong productIds
+           // res.json({ message: "Không có dữ liệu productIds" });
+           // return;
+         } else {
+           condition += ` AND id IN (${productIds.join(",")})`;
+         }
       }
+      // res.json({ productIds });
     });
 
     // search by :
