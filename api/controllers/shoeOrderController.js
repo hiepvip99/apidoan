@@ -418,12 +418,48 @@ const shoeOrderController = {
                           });
                         });
 
+                        const colorsQuery = `SELECT * FROM shoe_product_colors WHERE product_id = ${detail.product_id} AND color_id = ${detail.color_id};`;
+
+                        const colorS = await new Promise((resolve, reject) => {
+                          db.query(colorsQuery, (err, colorResult) => {
+                            if (err) {
+                              reject(err);
+                            } else {
+                              const color = colorResult[0];
+                              let images = [];
+
+                              if (color.images) {
+                                // console.log(color.images);
+                                // const imageUrlsArray = JSON.parse(color.images);
+                                const fixedImages = color.images.replace(
+                                  /\\/g,
+                                  "\\\\"
+                                );
+                                const imageUrlsArray = JSON.parse(fixedImages);
+                                // console.log(imageUrlsArray);
+                                images = imageUrlsArray.map((url) => ({ url }));
+                              }
+
+                              const colorImage = {
+                                // product_color_id: color.id,
+                                color_id: color.color_id,
+                                price: color.price,
+                                images: images,
+                              };
+
+                              resolve(colorImage);
+                              // resolve(colorResult[0]);
+                            }
+                          });
+                        });
+
                         return {
                           id: detail.id,
                           order_id: detail.order_id,
                           // product_id: detail.product_id,
                           product: product,
-                          color_id: detail.color_id,
+                          // color_id: detail.color_id,
+                          color: colorS,
                           size_id: detail.size_id,
                           quantity: detail.quantity,
                         };

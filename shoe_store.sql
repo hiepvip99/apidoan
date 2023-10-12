@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th9 17, 2023 lúc 03:59 PM
+-- Thời gian đã tạo: Th10 12, 2023 lúc 02:46 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.0.28
 
@@ -82,6 +82,14 @@ CREATE TABLE `shoe_cart` (
   `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `shoe_cart`
+--
+
+INSERT INTO `shoe_cart` (`id`, `account_id`, `product_id`, `color_id`, `size_id`, `quantity`) VALUES
+(2, 3, 1, 1, 1, 1),
+(6, 3, 1, 2, 1, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -139,15 +147,16 @@ CREATE TABLE `shoe_customer` (
   `date_of_birth` date NOT NULL,
   `email` varchar(255) DEFAULT NULL,
   `id_account` int(11) NOT NULL,
-  `image` varchar(255) NOT NULL
+  `image` varchar(255) NOT NULL,
+  `address` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_customer`
 --
 
-INSERT INTO `shoe_customer` (`id`, `name`, `phone_number`, `date_of_birth`, `email`, `id_account`, `image`) VALUES
-(1, 'Lê Minh Tú', '1234648979', '1996-10-11', 'leminh444@gmail.com', 3, 'https://api.flutter.dev/flutter/material/DropdownButton-class.html');
+INSERT INTO `shoe_customer` (`id`, `name`, `phone_number`, `date_of_birth`, `email`, `id_account`, `image`, `address`) VALUES
+(1, 'Lê Minh Tú', '1234648979', '1996-10-11', 'leminh444@gmail.com', 3, 'https://api.flutter.dev/flutter/material/DropdownButton-class.html', '[\"Hoằng Quỳ, Hoằng Hóa, Thanh Hóa\",\"Tân Triều, Thanh Trì, Hà Nội\"]');
 
 -- --------------------------------------------------------
 
@@ -167,17 +176,6 @@ CREATE TABLE `shoe_decentralization` (
 INSERT INTO `shoe_decentralization` (`id`, `name`) VALUES
 (1, 'Admin'),
 (2, 'User');
-
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `shoe_image`
---
-
-CREATE TABLE `shoe_image` (
-  `id` int(11) NOT NULL,
-  `image_path` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -221,17 +219,18 @@ CREATE TABLE `shoe_order` (
   `total_price` int(11) NOT NULL,
   `status_id` int(11) NOT NULL,
   `total_quantity` int(11) NOT NULL,
-  `payment_methods` varchar(255) NOT NULL DEFAULT 'Thanh toán khi nhận hàng'
+  `payment_methods` varchar(255) NOT NULL DEFAULT 'Thanh toán khi nhận hàng',
+  `delivery_address` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_order`
 --
 
-INSERT INTO `shoe_order` (`id`, `account_id`, `order_date`, `total_price`, `status_id`, `total_quantity`, `payment_methods`) VALUES
-(2, 2, '2023-09-17 20:31:36', 1700000, 1, 3, 'Thanh toán khi nhận hàng'),
-(3, 2, '0000-00-00 00:00:00', 1700000, 1, 3, 'Thanh toán khi nhận hàng'),
-(4, 2, '2023-09-17 20:31:36', 1700000, 1, 3, 'Thanh toán khi nhận hàng');
+INSERT INTO `shoe_order` (`id`, `account_id`, `order_date`, `total_price`, `status_id`, `total_quantity`, `payment_methods`, `delivery_address`) VALUES
+(2, 3, '2023-09-17 20:31:36', 1700000, 3, 4, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
+(3, 2, '2023-09-06 17:20:26', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
+(4, 2, '2023-09-17 20:31:36', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa');
 
 -- --------------------------------------------------------
 
@@ -247,6 +246,16 @@ CREATE TABLE `shoe_order_detail` (
   `size_id` int(11) NOT NULL,
   `quantity` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_order_detail`
+--
+
+INSERT INTO `shoe_order_detail` (`id`, `order_id`, `product_id`, `color_id`, `size_id`, `quantity`) VALUES
+(1, 2, 1, 1, 1, 1),
+(2, 3, 19, 1, 8, 1),
+(3, 4, 18, 2, 3, 2),
+(4, 2, 19, 2, 3, 3);
 
 -- --------------------------------------------------------
 
@@ -264,14 +273,12 @@ CREATE TABLE `shoe_order_status` (
 --
 
 INSERT INTO `shoe_order_status` (`id`, `name`) VALUES
-(1, 'Chưa thanh toán'),
-(2, 'Đã thanh toán'),
-(3, 'Chờ xác nhận'),
-(4, 'Chờ vận chuyển'),
-(5, 'Đang giao'),
-(6, 'Đã giao'),
-(7, 'Đã hủy'),
-(8, 'Trả hàng');
+(1, 'Chờ xác nhận'),
+(2, 'Chờ vận chuyển'),
+(3, 'Đang giao'),
+(4, 'Đã giao'),
+(5, 'Đã hủy'),
+(6, 'Trả hàng');
 
 -- --------------------------------------------------------
 
@@ -284,18 +291,19 @@ CREATE TABLE `shoe_product` (
   `name` varchar(255) NOT NULL,
   `manufacturer_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
-  `gender` varchar(10) NOT NULL
+  `gender` varchar(10) NOT NULL,
+  `description` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_product`
 --
 
-INSERT INTO `shoe_product` (`id`, `name`, `manufacturer_id`, `category_id`, `gender`) VALUES
-(1, 'Nike InfinityRN 4', 1, 1, 'Nam'),
-(15, 'giày chạy bộ Nike_12LF', 1, 1, 'Nam'),
-(18, 'Vans Shoe01', 15, 1, 'Nữ'),
-(19, 'test them giay', 3, 5, 'Nam');
+INSERT INTO `shoe_product` (`id`, `name`, `manufacturer_id`, `category_id`, `gender`, `description`) VALUES
+(1, 'Nike InfinityRN 4', 1, 1, 'Nam', 'a'),
+(15, 'giày chạy bộ Nike_12LF', 1, 1, 'Nam', 'b'),
+(18, 'Vans Shoe01', 15, 1, 'Nữ', 'c'),
+(19, 'test them giay', 3, 5, 'Nam', 'd');
 
 -- --------------------------------------------------------
 
@@ -411,9 +419,7 @@ ALTER TABLE `shoe_account_status`
 ALTER TABLE `shoe_cart`
   ADD PRIMARY KEY (`id`),
   ADD KEY `account_id` (`account_id`),
-  ADD KEY `product_id` (`product_id`),
-  ADD KEY `color_id` (`color_id`),
-  ADD KEY `size_id` (`size_id`);
+  ADD KEY `product_id` (`product_id`);
 
 --
 -- Chỉ mục cho bảng `shoe_category`
@@ -441,12 +447,6 @@ ALTER TABLE `shoe_decentralization`
   ADD PRIMARY KEY (`id`);
 
 --
--- Chỉ mục cho bảng `shoe_image`
---
-ALTER TABLE `shoe_image`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Chỉ mục cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
@@ -464,10 +464,10 @@ ALTER TABLE `shoe_order`
 --
 ALTER TABLE `shoe_order_detail`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `order_items_ibfk_2` (`product_id`),
   ADD KEY `order_items_ibfk_3` (`color_id`),
   ADD KEY `order_items_ibfk_4` (`size_id`),
-  ADD KEY `fk_order_id` (`order_id`);
+  ADD KEY `fk_order_id` (`order_id`),
+  ADD KEY `fk_product_id_order_detail` (`product_id`);
 
 --
 -- Chỉ mục cho bảng `shoe_order_status`
@@ -524,7 +524,7 @@ ALTER TABLE `shoe_account_status`
 -- AUTO_INCREMENT cho bảng `shoe_cart`
 --
 ALTER TABLE `shoe_cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_category`
@@ -551,12 +551,6 @@ ALTER TABLE `shoe_decentralization`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT cho bảng `shoe_image`
---
-ALTER TABLE `shoe_image`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
@@ -572,7 +566,7 @@ ALTER TABLE `shoe_order`
 -- AUTO_INCREMENT cho bảng `shoe_order_detail`
 --
 ALTER TABLE `shoe_order_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order_status`
@@ -608,9 +602,7 @@ ALTER TABLE `shoe_account`
 --
 ALTER TABLE `shoe_cart`
   ADD CONSTRAINT `shoe_cart_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `shoe_account` (`id`),
-  ADD CONSTRAINT `shoe_cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `shoe_product` (`id`),
-  ADD CONSTRAINT `shoe_cart_ibfk_3` FOREIGN KEY (`color_id`) REFERENCES `shoe_product_colors` (`id`),
-  ADD CONSTRAINT `shoe_cart_ibfk_4` FOREIGN KEY (`size_id`) REFERENCES `shoe_product_size` (`product_size_id`);
+  ADD CONSTRAINT `shoe_cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `shoe_product` (`id`);
 
 --
 -- Các ràng buộc cho bảng `shoe_customer`
@@ -629,6 +621,7 @@ ALTER TABLE `shoe_order`
 --
 ALTER TABLE `shoe_order_detail`
   ADD CONSTRAINT `fk_order_id` FOREIGN KEY (`order_id`) REFERENCES `shoe_order` (`id`),
+  ADD CONSTRAINT `fk_product_id_order_detail` FOREIGN KEY (`product_id`) REFERENCES `shoe_product` (`id`),
   ADD CONSTRAINT `order_items_ibfk_3` FOREIGN KEY (`color_id`) REFERENCES `shoe_color` (`id`),
   ADD CONSTRAINT `order_items_ibfk_4` FOREIGN KEY (`size_id`) REFERENCES `shoe_size` (`id`);
 
