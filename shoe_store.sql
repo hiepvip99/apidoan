@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 12, 2023 lúc 02:46 PM
+-- Thời gian đã tạo: Th10 13, 2023 lúc 04:57 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
--- Phiên bản PHP: 8.0.28
+-- Phiên bản PHP: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -42,8 +42,8 @@ CREATE TABLE `shoe_account` (
 INSERT INTO `shoe_account` (`id`, `username`, `password`, `decentralization_id`, `status_id`) VALUES
 (2, 'admin', 'admin1234', 1, 1),
 (3, 'user', 'user1234', 2, 1),
-(4, 'abc', 'aaaaaaaa', 2, 2),
-(8, 'testlancuoi', '12345678', 2, 5);
+(4, 'abcdef', 'aaaaaaaa', 2, 2),
+(8, 'testlancuoi', '12345678', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -62,10 +62,7 @@ CREATE TABLE `shoe_account_status` (
 
 INSERT INTO `shoe_account_status` (`id`, `name`) VALUES
 (1, 'Active'),
-(2, 'Inactive'),
-(3, 'Locked'),
-(4, 'Pending'),
-(5, 'Closed');
+(2, 'Locked');
 
 -- --------------------------------------------------------
 
@@ -88,7 +85,7 @@ CREATE TABLE `shoe_cart` (
 
 INSERT INTO `shoe_cart` (`id`, `account_id`, `product_id`, `color_id`, `size_id`, `quantity`) VALUES
 (2, 3, 1, 1, 1, 1),
-(6, 3, 1, 2, 1, 1);
+(6, 3, 1, 2, 1, 50);
 
 -- --------------------------------------------------------
 
@@ -180,6 +177,18 @@ INSERT INTO `shoe_decentralization` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `shoe_favorite`
+--
+
+CREATE TABLE `shoe_favorite` (
+  `id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `shoe_manufacturer`
 --
 
@@ -209,6 +218,20 @@ INSERT INTO `shoe_manufacturer` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `shoe_notification`
+--
+
+CREATE TABLE `shoe_notification` (
+  `id` int(11) NOT NULL,
+  `account_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` varchar(255) NOT NULL,
+  `timestamp` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `shoe_order`
 --
 
@@ -228,7 +251,7 @@ CREATE TABLE `shoe_order` (
 --
 
 INSERT INTO `shoe_order` (`id`, `account_id`, `order_date`, `total_price`, `status_id`, `total_quantity`, `payment_methods`, `delivery_address`) VALUES
-(2, 3, '2023-09-17 20:31:36', 1700000, 3, 4, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
+(2, 3, '2023-09-17 20:31:36', 1700000, 1, 4, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
 (3, 2, '2023-09-06 17:20:26', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
 (4, 2, '2023-09-17 20:31:36', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa');
 
@@ -447,9 +470,21 @@ ALTER TABLE `shoe_decentralization`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Chỉ mục cho bảng `shoe_favorite`
+--
+ALTER TABLE `shoe_favorite`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Chỉ mục cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Chỉ mục cho bảng `shoe_notification`
+--
+ALTER TABLE `shoe_notification`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -551,10 +586,22 @@ ALTER TABLE `shoe_decentralization`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT cho bảng `shoe_favorite`
+--
+ALTER TABLE `shoe_favorite`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
 --
 ALTER TABLE `shoe_manufacturer`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT cho bảng `shoe_notification`
+--
+ALTER TABLE `shoe_notification`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order`

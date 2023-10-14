@@ -5,10 +5,13 @@ const shoeCartController = {
   getCart(req, res) {
     const accountId = req.query.account_id;
     const query = `
-    SELECT sc.*, spc.price, spc.images
+    SELECT sc.id, sc.account_id, sc.product_id, sc.color_id, sc.size_id, sc.quantity, sp.name, sps.quantity AS inventory_quantity, spc.price, spc.images
     FROM shoe_cart AS sc
-    INNER JOIN shoe_product_colors AS spc ON sc.product_id = spc.product_id AND sc.color_id = spc.color_id
+    INNER JOIN shoe_product AS sp ON sc.product_id = sp.id
+    INNER JOIN shoe_product_size AS sps ON sc.product_id = sps.product_id AND sc.size_id = sps.size_id AND sc.color_id = sps.color_id
+    INNER JOIN shoe_product_colors AS spc ON sp.id = spc.product_id AND sc.color_id = spc.color_id
     WHERE sc.account_id = ?
+    GROUP BY sc.id
   `;
 
     db.query(query, [accountId], (err, results) => {
@@ -111,7 +114,7 @@ const shoeCartController = {
 
   // Xóa sản phẩm khỏi giỏ hàng
   removeFromCart(req, res) {
-    const itemId = req.query.id;
+    const itemId = req.body.id;
     const query = `DELETE FROM shoe_cart WHERE id = ?`;
 
     db.query(query, [itemId], (err, results) => {
@@ -126,11 +129,10 @@ const shoeCartController = {
 
   // Cập nhật số lượng sản phẩm trong giỏ hàng
   updateQuantity(req, res) {
-    const itemId = req.query.id;
-    const { quantity } = req.body;
+    const {id, quantity } = req.body;
     const query = `UPDATE shoe_cart SET quantity = ? WHERE id = ?`;
 
-    db.query(query, [quantity, itemId], (err, results) => {
+    db.query(query, [quantity, id], (err, results) => {
       if (err) throw err;
       const data = {
         status: 200,

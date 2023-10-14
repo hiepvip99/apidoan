@@ -299,8 +299,10 @@ const shoeProductController = {
       condition += ` AND category_id = ${categoryId}`;
     }
     if (gender) {
-      condition += ` AND gender = '%${gender}%'`;
+      condition += ` AND gender = '${gender}'`;
     }
+
+    console.log("condition", condition);
 
     db.query(
       `SELECT COUNT(*) AS total FROM shoe_product ${condition}`,
