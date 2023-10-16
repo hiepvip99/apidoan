@@ -4,6 +4,9 @@ const db = require("../databases/db");
 const shoeFavoriteController = {
   getAllShoeFavoriteProduct(req, res) {
     const accountId = req.query.account_id;
+    const page = req.query.page || 1;
+    const step = req.query.step || 10;
+    const offset = (page - 1) * step;
 
     const query = `
     SELECT product_id
@@ -13,7 +16,7 @@ const shoeFavoriteController = {
 
     db.query(query, [accountId], (err, results) => {
       if (err) throw err;
-let condition = `WHERE 1 = 1`;
+      let condition = `WHERE 1 = 1`;
       // Trả về danh sách các ID sản phẩm
       const productIds = results.map((result) => result.product_id);
       if (productIds.length === 0) {
@@ -151,7 +154,7 @@ let condition = `WHERE 1 = 1`;
                               currentPage: parseInt(page),
                               step: parseInt(step),
                               totalPages: totalPages,
-                              keyword: keyword,
+                              // keyword: keyword,
                               data: allProducts,
                             };
                             res.status(200).json(data);
@@ -169,77 +172,126 @@ let condition = `WHERE 1 = 1`;
     });
   },
 
-  // // Controller để lấy danh sách tất cả các màu giày
-  //  getAllShoeFavoriteProduct(req, res) {
-  //   const query = "SELECT * FROM shoe_color ORDER BY name ASC";
-  //   // console.log("vao all");
+  checkFavorite(req, res) {
+  // console.log("Đã vào hàm checkFavorite");
+  const accountId = req.query.account_id;
+  const productId = req.query.product_id;
+
+  if (!productId || !accountId) {
+    return res.status(400).json({ error: "Missing product_id or account_id parameter" });
+  }
+
+  // console.log("accountId: ", accountId);
+  const query = `
+    SELECT * FROM shoe_favorite
+    WHERE account_id = ? AND product_id = ?
+  `;
+
+  db.query(query, [accountId, productId], (err, result) => {
+    if (err) {
+      throw err;
+    }
+
+    // Trả về true nếu sản phẩm đã được yêu thích, ngược lại trả về false
+    const isFavorite = result.length > 0;
+    const data = {
+      isFavorite: isFavorite,
+      status: 200,
+    };
+    res.status(200).json(data);
+  });
+},
+
+  // // // Controller để lấy danh sách tất cả các màu giày
+  // //  getAllShoeFavoriteProduct(req, res) {
+  // //   const query = "SELECT * FROM shoe_color ORDER BY name ASC";
+  // //   // console.log("vao all");
+  // //   // Thực hiện truy vấn
+  // //   db.query(query, (error, results) => {
+  // //     if (error) {
+  // //       const data = {
+  // //         status: 500,
+  // //         error: true,
+  // //       };
+  // //       res.status(500).json(data);
+  // //       // res.status(500).json({ error: 'Lỗi truy vấn' });
+  // //     } else {
+  // //       const data = {
+  // //         status: 200,
+  // //         data: results,
+  // //       };
+  // //       res.status(200).json(data);
+  // //       // res.status(200).json(results);
+  // //     }
+  // //   });
+  // // },
+
+  // // Controller để lấy một màu giày dựa trên ID
+  // getShoeColorById(req, res) {
+  //   const id = req.params.id;
+  //   const query = "SELECT * FROM shoe_color WHERE id = ?";
+
   //   // Thực hiện truy vấn
-  //   db.query(query, (error, results) => {
+  //   db.query(query, [id], (error, results) => {
   //     if (error) {
+  //       // res.status(500).json({ error: 'Lỗi truy vấn' });
   //       const data = {
   //         status: 500,
   //         error: true,
   //       };
   //       res.status(500).json(data);
-  //       // res.status(500).json({ error: 'Lỗi truy vấn' });
   //     } else {
-  //       const data = {
-  //         status: 200,
-  //         data: results,
-  //       };
-  //       res.status(200).json(data);
-  //       // res.status(200).json(results);
+  //       if (results.length === 0) {
+  //         res.status(404).json({ error: "Không tìm thấy màu giày" });
+  //       } else {
+  //         const data = {
+  //           status: 200,
+  //           object: results[0],
+  //         };
+  //         res.status(200).json(data);
+  //         // res.status(200).json(results[0]);
+  //       }
   //     }
   //   });
   // },
 
-  // Controller để lấy một màu giày dựa trên ID
-  getShoeColorById(req, res) {
-    const id = req.params.id;
-    const query = "SELECT * FROM shoe_color WHERE id = ?";
-
-    // Thực hiện truy vấn
-    db.query(query, [id], (error, results) => {
-      if (error) {
-        // res.status(500).json({ error: 'Lỗi truy vấn' });
-        const data = {
-          status: 500,
-          error: true,
-        };
-        res.status(500).json(data);
-      } else {
-        if (results.length === 0) {
-          res.status(404).json({ error: "Không tìm thấy màu giày" });
-        } else {
-          const data = {
-            status: 200,
-            object: results[0],
-          };
-          res.status(200).json(data);
-          // res.status(200).json(results[0]);
-        }
-      }
-    });
-  },
-
   // Controller để tạo một màu giày mới
-  createShoeColor(req, res) {
+  createFavorite(req, res) {
     const accountId = req.body.account_id;
     const productId = req.body.product_id;
 
-    const query = `
-    INSERT INTO shoe_favorite (account_id, product_id)
-    VALUES (?, ?)
+    // console.log("accountId: ", accountId);
+    const selectQuery = `
+    SELECT * FROM shoe_favorite WHERE account_id = ? AND product_id = ?
   `;
 
-    db.query(query, [accountId, productId], (err, result) => {
+    const insertQuery = `
+    INSERT INTO shoe_favorite (account_id, product_id) VALUES (?, ?)
+  `;
+
+    db.query(selectQuery, [accountId, productId], (err, result) => {
       if (err) throw err;
 
-      // Trả về kết quả thành công hoặc thông báo lỗi nếu có
-      const data = {
-        status: 200,
-      };
-      res.status(200).json(data);
+      if (result.length > 0) {
+        // Nếu đã có record trong database, không thực hiện thêm gì cả
+        const data = {
+          status: 200,
+          message: "Record already exists in database",
+        };
+        res.status(200).json(data);
+      } else {
+        // Nếu chưa có record trong database, thực hiện việc thêm mới
+        db.query(insertQuery, [accountId, productId], (err, result) => {
+          if (err) throw err;
+
+          // Trả về kết quả thành công
+          const data = {
+            status: 200,
+            message: "Record added to database",
+          };
+          res.status(200).json(data);
+        });
+      }
     });
   },
 
@@ -263,23 +315,29 @@ let condition = `WHERE 1 = 1`;
   // },
 
   // Controller để xóa một màu giày dựa trên ID
-  deleteShoeColor(req, res) {
-    const favoriteId = req.body.id;
+  deleteFavorite(req, res) {
+    const shoeFavorite = req.body; // Danh sách các cặp account_id và product_id
 
-    const query = `
-    DELETE FROM shoe_favorite
-    WHERE id = ?
-  `;
+    shoeFavorite.forEach((shoeColor) => {
+      const accountId = shoeColor.account_id;
+      const productId = shoeColor.product_id;
 
-    db.query(query, [favoriteId], (err, result) => {
-      if (err) throw err;
+      const query = `
+      DELETE FROM shoe_favorite
+      WHERE account_id = ? AND product_id = ?
+    `;
 
-      // Trả về kết quả thành công hoặc thông báo lỗi nếu có
-      const data = {
-        status: 200,
-      };
-      res.status(200).json(data);
+      db.query(query, [accountId, productId], (err, result) => {
+        if (err) throw err;
+      });
     });
+
+    // Trả về kết quả thành công hoặc thông báo lỗi nếu có
+    const data = {
+      status: 200,
+      message: "Deleted successfully",
+    };
+    res.status(200).json(data);
   },
 };
 

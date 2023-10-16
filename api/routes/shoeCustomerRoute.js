@@ -7,7 +7,7 @@ const shoeCustomerController = require("../controllers/shoeCustomerController");
 // Định nghĩa các route
 router.get("/shoe_customers", shoeCustomerController.getAllShoeCustomers);
 router.get(
-  "/shoe_customers/:id",
+  "/shoe_customers",
   shoeCustomerController.getShoeCustomerByIdAccount
 );
 router.post("/shoe_customers", shoeCustomerController.createShoeCustomer);

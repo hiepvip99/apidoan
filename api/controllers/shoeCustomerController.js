@@ -76,7 +76,7 @@ function getAllShoeCustomers(req, res) {
 
 // Controller để lấy một khách hàng giày dựa trên ID
 function getShoeCustomerByIdAccount(req, res) {
-  const id = req.param.accountId;
+  const id = req.query.accountId;
   const query = "SELECT * FROM shoe_customer WHERE id_account = ?";
 
   // Thực hiện truy vấn
