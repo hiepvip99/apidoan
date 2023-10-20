@@ -1,5 +1,5 @@
 const db = require("../databases/db");
-const { sendNotification } = require("../firebase-notification");
+const { sendNotification, sendNotificationWithToken } = require("../firebase-notification");
 
 const shoeOrderController = {
   getById(req, res) {
@@ -544,6 +544,7 @@ const shoeOrderController = {
       total_quantity,
       payment_methods,
       order_details,
+      delivery_address,
     } = req.body;
 
     // Kiểm tra các trường thông tin bắt buộc của đơn hàng
@@ -553,7 +554,7 @@ const shoeOrderController = {
       !total_price ||
       !status_id ||
       !payment_methods ||
-      !total_quantity
+      !total_quantity || !delivery_address
     ) {
       res.status(400).json({ error: "Thiếu thông tin bắt buộc của đơn hàng" });
       return;
@@ -561,8 +562,8 @@ const shoeOrderController = {
 
     // Tạo truy vấn để thêm đơn hàng mới vào bảng `shoe_order`
     const addOrderQuery = `
-    INSERT INTO shoe_order (account_id, order_date, total_price, status_id, total_quantity, payment_methods)
-    VALUES (${account_id}, '${order_date}', ${total_price}, ${status_id}, ${total_quantity}, '${payment_methods}')
+    INSERT INTO shoe_order (account_id, order_date, total_price, status_id, total_quantity, payment_methods, delivery_address)
+    VALUES (${account_id}, '${order_date}', ${total_price}, ${status_id}, ${total_quantity}, '${payment_methods}', '${delivery_address}')
   `;
 
     db.query(addOrderQuery, (err, orderResult) => {
@@ -586,6 +587,43 @@ const shoeOrderController = {
           VALUES (${newOrderId}, ${product_id}, ${color_id}, ${size_id}, ${quantity})
         `;
         });
+
+        // order_details.map((detail) => {
+        //   const { product_id, color_id, size_id, quantity } = detail;
+        //   // Lấy giá trị quantity hiện tại từ bảng shoe_product_size
+        //   const selectQuery = `SELECT quantity FROM shoe_product_size WHERE product_id = ${product_id} AND color_id = ${color_id} AND size_id = ${size_id}`;
+        //   db.query(selectQuery, (error, results) => {
+        //     if (error) {
+        //       console.error("Lỗi khi truy vấn cơ sở dữ liệu: " + error);
+        //       res
+        //         .status(500)
+        //         .json({ message: "Lỗi khi truy vấn cơ sở dữ liệu" });
+        //       return;
+        //     }
+
+        //     if (results.length === 0) {
+        //       res.status(404).json({ message: "Không tìm thấy bản ghi" });
+        //       return;
+        //     }
+
+        //     const currentQuantity = results[0].quantity;
+        //     const newQuantity = currentQuantity - quantity;
+
+        //     // Cập nhật giá trị mới vào bảng shoe_product_size
+        //     const updateQuery = `UPDATE shoe_product_size SET quantity = ${newQuantity} WHERE product_id = ${product_id} AND color_id = ${color_id} AND size_id = ${size_id}`;
+        //     db.query(updateQuery, (error, results) => {
+        //       if (error) {
+        //         console.error("Lỗi khi cập nhật cơ sở dữ liệu: " + error);
+        //         res
+        //           .status(500)
+        //           .json({ message: "Lỗi khi cập nhật cơ sở dữ liệu" });
+        //         return;
+        //       }
+
+        //       // res.json({ message: "Cập nhật số lượng thành công" });
+        //     });
+        //   });
+        // });
 
         // Thực hiện lần lượt các truy vấn thêm chi tiết đơn hàng
         addOrderDetailQueries.forEach((query) => {
@@ -680,23 +718,35 @@ const shoeOrderController = {
           return;
         }
 
+        db.query(`SELECT n.notification_token, n.id_account FROM shoe_order o
+JOIN shoe_customer n ON o.account_id = n.id_account
+WHERE o.id = ${id}`, (err, results) => {
+          if (err) {
+            console.error("Error executing MySQL query:", err);
+            const data = {
+              status: 500,
+              error: true,
+            };
+            res.status(500).json(data);
+            return;
+          }
+          if (results.length > 0) {
+            const notificationToken = results[0].notification_token;
+            const user_account_id = results[0].id_account;
+
+            addNotification(user_account_id, 'Đơn hàng của bạn đã có cập nhật', `Đơn hàng có mã là: ${id} đã có cập nhật mới`, notificationToken);
+            // Tiếp tục xử lý với notificationToken
+            const data = {
+              status: 200,
+            };
+            res.status(200).json(data);
+          }
+        });
+
         // if (status_id === ) {
         // }
         // Gọi hàm sendNotification
-        sendNotification(
-          "Có cập nhật mới",
-          "Đơn hàng của bạn đã có cập nhật,Vui lòng kiểm tra thông tin đơn hàng của bạn",
-          "all"
-        ).then((response) => {
-            console.log("Thông báo đã được gửi:", response);
-          })
-          .catch((error) => {
-            console.log("Lỗi khi gửi thông báo:", error);
-          });
-        const data = {
-          status: 200,
-        };
-        res.status(200).json(data);
+        
       }
     );
   },
@@ -733,5 +783,29 @@ const shoeOrderController = {
   //   });
   // },
 };
+
+function addNotification(accountId, title, content, notificationToken) {
+  const timestamp = new Date().toISOString();
+  const query = `INSERT INTO shoe_notification (account_id, title, content, timestamp)
+                 VALUES (${accountId}, '${title}', '${content}', '${timestamp}')`;
+
+  db.query(query, (error, results) => {
+    if (error) {
+      console.error('Error adding notification:', error);
+      return;
+    }
+    sendNotificationWithToken(
+      "Có cập nhật mới",
+      "Đơn hàng của bạn đã có cập nhật,Vui lòng kiểm tra thông tin đơn hàng của bạn",
+      notificationToken
+    ).then((response) => {
+      console.log("Thông báo đã được gửi:", response);
+    })
+      .catch((error) => {
+        console.log("Lỗi khi gửi thông báo:", error);
+      });
+    console.log('Notification added successfully!');
+  });
+}
 
 module.exports = shoeOrderController;

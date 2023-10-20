@@ -86,7 +86,7 @@ function getAllShoeCustomers(req, res) {
 //       // const total = countResult[0].total || 0;
 //       const totalPages = Math.ceil(total / step);
 //       db.query(
-//         `SELECT * FROM shoe_customer where name like 
+//         `SELECT * FROM shoe_customer where name like
 //       '${`%${keyword}%`}' LIMIT ${offset}, ${parseInt(step)} `,
 //         (err, results) => {
 //           if (err) {
@@ -130,18 +130,51 @@ function getAllShoeCustomers(req, res) {
 //   //   }
 //   // });
 // }
+function getNotificationByAccountId(req, res) {
+  const accountId = req.query.accountId;
+  const query = 'SELECT * FROM shoe_notification WHERE account_id = ? LIMIT 50';
+
+  db.query(query, [accountId], (error, results) => {
+    if (error) {
+      console.error('Error retrieving notifications:', error);
+      // callback(error, null);
+    } else {
+      console.log('Notifications retrieved successfully');
+      const data = {
+        status: 200,
+        data: results,
+      }
+      return res.status(200).json(data);
+    }
+  });
+}
+
+function updateNotificationToken(req, res) {
+  const idAccount = req.body.idAccount;
+  const newToken = req.body.newToken;
+
+  const query = `UPDATE shoe_customer SET notification_token = '${newToken}' WHERE id_account = ${idAccount}`;
+
+  db.query(query, (error, results) => {
+    if (error) {
+      console.error('Lỗi khi cập nhật token thông báo:', error);
+    } else {
+      console.log('Token thông báo đã được cập nhật thành công.');
+      const data = {
+        status: 200,
+      }
+      return res.status(200).json(data);
+    }
+  });
+}
 
 // Controller để lấy một khách hàng giày dựa trên ID
 function getShoeCustomerByIdAccount(req, res) {
   const id = req.query.accountId;
-  const query = "SELECT * FROM shoe_customer WHERE id_account = ?";
+  const query = "SELECT *, DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS date_of_birth FROM shoe_customer WHERE id_account = ?";
 
-  console.log("đã vào hàm getShoeCustomerByIdAccount này rồi");
-
-  // Thực hiện truy vấn
   db.query(query, [id], (error, results) => {
     if (error) {
-      // res.status(500).json({ error: "Lỗi truy vấn" });
       const data = {
         status: 500,
         error: true,
@@ -155,9 +188,7 @@ function getShoeCustomerByIdAccount(req, res) {
           error: true,
         };
         res.status(404).json(data);
-        // res.status(404).json({ error: "Không tìm thấy khách hàng" });
       } else {
-        // res.status(200).json(results[0]);
         const shoeCustomer = results[0];
         shoeCustomer.address = JSON.parse(shoeCustomer.address);
         res.status(200).json(shoeCustomer);
@@ -165,6 +196,41 @@ function getShoeCustomerByIdAccount(req, res) {
     }
   });
 }
+
+
+// function getShoeCustomerByIdAccount(req, res) {
+//   const id = req.query.accountId;
+//   const query = "SELECT * FROM shoe_customer WHERE id_account = ?";
+
+//   // console.log("đã vào hàm getShoeCustomerByIdAccount này rồi");
+
+//   // Thực hiện truy vấn
+//   db.query(query, [id], (error, results) => {
+//     if (error) {
+//       // res.status(500).json({ error: "Lỗi truy vấn" });
+//       const data = {
+//         status: 500,
+//         error: true,
+//       };
+//       res.status(500).json(data);
+//     } else {
+//       if (results.length === 0) {
+//         const data = {
+//           status: 404,
+//           detail: "Không tìm thấy khách hàng",
+//           error: true,
+//         };
+//         res.status(404).json(data);
+//         // res.status(404).json({ error: "Không tìm thấy khách hàng" });
+//       } else {
+//         // res.status(200).json(results[0]);
+//         const shoeCustomer = results[0];
+//         shoeCustomer.address = JSON.parse(shoeCustomer.address);
+//         res.status(200).json(shoeCustomer);
+//       }
+//     }
+//   });
+// }
 
 // Controller để tạo một khách hàng giày mới
 function createShoeCustomer(req, res) {
@@ -248,14 +314,14 @@ function createShoeCustomer(req, res) {
 // Controller để cập nhật một khách hàng giày dựa trên ID
 function updateShoeCustomer(req, res) {
   // const customerId = req.params.id; // Lấy id khách hàng từ request params
-  const { name, phone_number, date_of_birth, email, address , id} = req.body; // Lấy thông tin khách hàng từ request body
+  const { name, phone_number, date_of_birth, email, id } = req.body; // Lấy thông tin khách hàng từ request body
 
   // Thực hiện cập nhật thông tin khách hàng trong cơ sở dữ liệu
   const updateQuery =
-    "UPDATE shoe_customer SET name = ?, phone_number = ?, date_of_birth = ?, email = ?, address = ? WHERE id = ?";
+    "UPDATE shoe_customer SET name = ?, phone_number = ?, date_of_birth = ?, email = ? WHERE id = ?";
   db.query(
     updateQuery,
-    [name, phone_number, date_of_birth, email, address, id],
+    [name, phone_number, date_of_birth, email, id],
     (error, results, fields) => {
       if (error) {
         console.error("Lỗi khi cập nhật khách hàng: ", error);
@@ -390,6 +456,33 @@ function getVipCustomer(req, res) {
   });
 }
 
+function updateAddress(req, res) {
+  console.log("vào updateAddress");
+  const customerId = req.body.customerId;
+  // Chuyển đổi danh sách chuỗi thành chuỗi JSON
+  const addressesJson = JSON.stringify(req.body.addresses);
+  
+  // Tạo câu truy vấn SQL
+  const sql = `UPDATE shoe_customer SET address = ? WHERE id = ?`;
+
+  // Thực thi câu truy vấn
+  db.query(sql, [addressesJson, customerId], (error, results, fields) => {
+    if (error) {
+      const data = {
+        status: 500,
+        error: true,
+      };
+      console.error('Lỗi khi cập nhật địa chỉ:', error);
+      return res.status(500).json(data);
+    }
+    const data = {
+      status: 200,
+    };
+    console.log(`Đã cập nhật địa chỉ cho khách hàng có id ${customerId}`);
+    return res.status(200).json(data);
+  });
+}
+
 module.exports = {
   getAllShoeCustomers,
   getShoeCustomerByIdAccount,
@@ -399,4 +492,7 @@ module.exports = {
   getShoeCustomersByAccountId,
   getVipCustomer,
   updateShoeCustomerImage,
+  updateAddress,
+  updateNotificationToken,
+  getNotificationByAccountId,
 };

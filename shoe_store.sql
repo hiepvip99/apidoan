@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 13, 2023 lúc 04:57 PM
+-- Thời gian đã tạo: Th10 20, 2023 lúc 10:54 AM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.2.4
 
@@ -84,8 +84,8 @@ CREATE TABLE `shoe_cart` (
 --
 
 INSERT INTO `shoe_cart` (`id`, `account_id`, `product_id`, `color_id`, `size_id`, `quantity`) VALUES
-(2, 3, 1, 1, 1, 1),
-(6, 3, 1, 2, 1, 50);
+(2, 3, 1, 1, 1, 10),
+(6, 3, 1, 2, 1, 10);
 
 -- --------------------------------------------------------
 
@@ -145,15 +145,16 @@ CREATE TABLE `shoe_customer` (
   `email` varchar(255) DEFAULT NULL,
   `id_account` int(11) NOT NULL,
   `image` varchar(255) NOT NULL,
-  `address` text NOT NULL
+  `address` text NOT NULL,
+  `notification_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_customer`
 --
 
-INSERT INTO `shoe_customer` (`id`, `name`, `phone_number`, `date_of_birth`, `email`, `id_account`, `image`, `address`) VALUES
-(1, 'Lê Minh Tú', '1234648979', '1996-10-11', 'leminh444@gmail.com', 3, 'https://api.flutter.dev/flutter/material/DropdownButton-class.html', '[\"Hoằng Quỳ, Hoằng Hóa, Thanh Hóa\",\"Tân Triều, Thanh Trì, Hà Nội\"]');
+INSERT INTO `shoe_customer` (`id`, `name`, `phone_number`, `date_of_birth`, `email`, `id_account`, `image`, `address`, `notification_token`) VALUES
+(1, 'Lê Minh Tú', '0358789445', '1996-12-25', 'leminh444@gmail.com', 3, 'api/image/1694790277767-517884376.png', '[\"Hoằng Quỳ, Hoằng Hóa, Thanh Hóa\",\"Tân Triều, Thanh Trì, Hà Nội\",\"Quận 10, TP Hồ Chí Minh\"]', '');
 
 -- --------------------------------------------------------
 
@@ -185,6 +186,13 @@ CREATE TABLE `shoe_favorite` (
   `account_id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `shoe_favorite`
+--
+
+INSERT INTO `shoe_favorite` (`id`, `account_id`, `product_id`) VALUES
+(16, 3, 1);
 
 -- --------------------------------------------------------
 
@@ -243,17 +251,20 @@ CREATE TABLE `shoe_order` (
   `status_id` int(11) NOT NULL,
   `total_quantity` int(11) NOT NULL,
   `payment_methods` varchar(255) NOT NULL DEFAULT 'Thanh toán khi nhận hàng',
-  `delivery_address` varchar(255) NOT NULL
+  `delivery_address` varchar(255) NOT NULL,
+  `note` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `shoe_order`
 --
 
-INSERT INTO `shoe_order` (`id`, `account_id`, `order_date`, `total_price`, `status_id`, `total_quantity`, `payment_methods`, `delivery_address`) VALUES
-(2, 3, '2023-09-17 20:31:36', 1700000, 1, 4, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
-(3, 2, '2023-09-06 17:20:26', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa'),
-(4, 2, '2023-09-17 20:31:36', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa');
+INSERT INTO `shoe_order` (`id`, `account_id`, `order_date`, `total_price`, `status_id`, `total_quantity`, `payment_methods`, `delivery_address`, `note`) VALUES
+(2, 3, '2023-09-17 20:31:36', 1700000, 1, 4, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa', ''),
+(3, 2, '2023-09-06 17:20:26', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa', ''),
+(4, 2, '2023-09-17 20:31:36', 1700000, 1, 1, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa', ''),
+(6, 3, '2023-10-18 16:27:11', 11000000, 1, 20, 'Thanh toán khi nhận hàng', 'Hoằng Quỳ, Hoằng Hóa, Thanh Hóa', ''),
+(7, 3, '2023-10-19 20:33:07', 5000000, 1, 10, 'Thanh toán khi nhận hàng', 'Quận 10, TP Hồ Chí Minh', NULL);
 
 -- --------------------------------------------------------
 
@@ -278,7 +289,10 @@ INSERT INTO `shoe_order_detail` (`id`, `order_id`, `product_id`, `color_id`, `si
 (1, 2, 1, 1, 1, 1),
 (2, 3, 19, 1, 8, 1),
 (3, 4, 18, 2, 3, 2),
-(4, 2, 19, 2, 3, 3);
+(4, 2, 19, 2, 3, 3),
+(6, 6, 1, 1, 1, 10),
+(7, 6, 1, 2, 1, 10),
+(8, 7, 1, 1, 1, 10);
 
 -- --------------------------------------------------------
 
@@ -373,9 +387,9 @@ CREATE TABLE `shoe_product_size` (
 --
 
 INSERT INTO `shoe_product_size` (`product_id`, `size_id`, `color_id`, `quantity`) VALUES
-(1, 1, 1, 20),
+(1, 1, 1, 10),
 (1, 2, 1, 66),
-(1, 1, 2, 55),
+(1, 1, 2, 45),
 (1, 2, 2, 30),
 (15, 1, 1, 15),
 (15, 2, 1, 40),
@@ -559,7 +573,7 @@ ALTER TABLE `shoe_account_status`
 -- AUTO_INCREMENT cho bảng `shoe_cart`
 --
 ALTER TABLE `shoe_cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_category`
@@ -589,7 +603,7 @@ ALTER TABLE `shoe_decentralization`
 -- AUTO_INCREMENT cho bảng `shoe_favorite`
 --
 ALTER TABLE `shoe_favorite`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_manufacturer`
@@ -607,13 +621,13 @@ ALTER TABLE `shoe_notification`
 -- AUTO_INCREMENT cho bảng `shoe_order`
 --
 ALTER TABLE `shoe_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order_detail`
 --
 ALTER TABLE `shoe_order_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `shoe_order_status`

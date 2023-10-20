@@ -20,7 +20,19 @@ function sendNotification(title, body, topic) {
   return admin.messaging().send(message);
 }
 
-module.exports = { sendNotification };
+function sendNotificationWithToken(title, body, notificationToken) {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    token: notificationToken,
+  };
+
+  return admin.messaging().send(message);
+}
+
+module.exports = { sendNotification, sendNotificationWithToken };
 /*
 
 Phần ví dụ sử dụng
