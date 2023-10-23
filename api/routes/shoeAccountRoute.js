@@ -14,6 +14,8 @@ router.get("/getall", accountController.getAllAccount);
 
 router.post("/add", accountController.addAccount);
 
+router.post("/login", accountController.login);
+
 router.put("/update", accountController.updateAccount);
 
 router.delete("/delete", accountController.deleteAccount);

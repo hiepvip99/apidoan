@@ -159,6 +159,29 @@ const AccountController = {
     );
   },
 
+  login(req, res) {
+    const { username, password } = req.body;
+
+    const query = `SELECT * FROM shoe_account WHERE username = '${username}' AND password = '${password}'`;
+
+    db.query(query, (error, results) => {
+      if (error) {
+        console.error('Lỗi khi thực hiện truy vấn:', error);
+        res.status(500).json({ message: 'Đã xảy ra lỗi khi đăng nhập.' });
+      } else {
+        if (results.length === 0) {
+          res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
+        } else {
+          const data = {
+            status: 200,
+            data: results[0],
+          }
+          res.status(200).json(data);
+        }
+      }
+    });
+  },
+
   addAccount(req, res) {
     const { username, password, decentralization_id, status_id } = req.body;
     console.log("username", username);

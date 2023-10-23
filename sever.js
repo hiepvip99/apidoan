@@ -21,8 +21,11 @@ const shoeOrderRoutes = require("./api/routes/shoeOrderRoutes");
 const shoeStatisticRoutes = require("./api/routes/statisticRoute");
 const shoeCartRoutes = require("./api/routes/shoeCartRoute");
 const favoriteRoute = require("./api/routes/favoriteRoute");
+const discountRoute = require("./api/routes/discountRoute");
+// const accountRoute = require("./api/routes/accountRoute");
 
 // Set up routes
+// app.use("/api/account", accountRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/category", categoryRoutes);
 app.use("/api/account", accountRoutes);
@@ -36,6 +39,7 @@ app.use("/api/order", shoeOrderRoutes);
 app.use("/api", shoeStatisticRoutes);
 app.use("/api/cart", shoeCartRoutes);
 app.use("/api/favorite", favoriteRoute);
+app.use("/api/discount", discountRoute);
 
 app.get("/api/image/:imageName", (req, res) => {
   const imageName = req.params.imageName;

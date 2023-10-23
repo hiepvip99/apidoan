@@ -15,6 +15,7 @@ router.post("/shoe_customers", shoeCustomerController.createShoeCustomer);
 router.put("/shoe_customers", shoeCustomerController.updateShoeCustomer);
 router.put("/shoe_customers/address", shoeCustomerController.updateAddress);
 router.put("/shoe_customers/notification", shoeCustomerController.updateNotificationToken);
+router.put("/shoe_customers/image", shoeCustomerController.updateShoeCustomerImage);
 router.delete("/shoe_customers", shoeCustomerController.deleteShoeCustomer);
 router.get(
   "/shoe_customers/account/:accountId",

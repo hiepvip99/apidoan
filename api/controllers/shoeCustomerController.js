@@ -1,6 +1,6 @@
 // shoeCustomerController.js
 const db = require("../databases/db");
-
+const upload = require("../uploadHelper");
 // Controller để lấy danh sách tất cả khách hàng giày
 function getAllShoeCustomers(req, res) {
   const page = req.query.page || 1;
@@ -342,7 +342,7 @@ function updateShoeCustomer(req, res) {
 }
 
 function updateShoeCustomerImage(req, res) {
-  const customerId = req.query.id; // Lấy id khách hàng từ request params
+   // Lấy id khách hàng từ request params
 
   // Lưu ảnh
   upload.single("image")(req, res, function (err) {
@@ -355,7 +355,7 @@ function updateShoeCustomerImage(req, res) {
       res.status(500).json(data);
       return;
     }
-
+    const customerId = req.body.customerId;
     // Lấy đường dẫn ảnh
     const imageUrl = req.file ? `api/image/${req.file.filename}` : "";
 
@@ -372,6 +372,7 @@ function updateShoeCustomerImage(req, res) {
       } else {
         const data = {
           status: 200,
+          url: imageUrl,
           detail: "Cập nhật ảnh khách hàng thành công",
         };
         res.status(200).json(data);
