@@ -99,7 +99,7 @@ function applyDiscount(req, res) {
                             console.error('Lỗi khi áp dụng mã giảm giá cho khách hàng:', error);
                             res.status(500).json({ message: 'Đã xảy ra lỗi khi áp dụng mã giảm giá.' });
                         } else {
-                            res.status(200).json({ success: true });
+                            res.status(200).json({ success: true, discount: discount });
                         }
                     });
                 }
