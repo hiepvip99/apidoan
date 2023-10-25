@@ -56,11 +56,11 @@ function getShoeColorById(req, res) {
 
 // Controller để tạo một màu giày mới
 function createShoeColor(req, res) {
-  const { name } = req.body;
-  const query = 'INSERT INTO shoe_color (name) VALUES (?)';
+  const { name, color_code } = req.body;
+  const query = 'INSERT INTO shoe_color (name, color_code) VALUES (?, ?)';
 
   // Thực hiện truy vấn
-  db.query(query, [name], (error, results) => {
+  db.query(query, [name, color_code], (error, results) => {
     if (error) {
       // res.status(500).json({ error: 'Lỗi truy vấn' });
       const data = {
@@ -82,12 +82,12 @@ function createShoeColor(req, res) {
 
 // Controller để cập nhật một màu giày dựa trên ID
 function updateShoeColor(req, res) {
-  const id = req.params.id;
-  const { name } = req.body;
-  const query = 'UPDATE shoe_color SET name = ? WHERE id = ?';
+  // const id = req.bo.id;
+  const { id, name, color_code } = req.body;
+  const query = 'UPDATE shoe_color SET name = ?, color_code = ? WHERE id = ?';
 
   // Thực hiện truy vấn
-  db.query(query, [name, id], (error, results) => {
+  db.query(query, [name, color_code, id], (error, results) => {
     if (error) {
       // res.status(500).json({ error: 'Lỗi truy vấn' });
       const data = {
@@ -108,7 +108,7 @@ function updateShoeColor(req, res) {
 
 // Controller để xóa một màu giày dựa trên ID
 function deleteShoeColor(req, res) {
-  const id = req.params.id;
+  const id = req.body.id;
   const query = 'DELETE FROM shoe_color WHERE id = ?';
 
   // Thực hiện truy vấn

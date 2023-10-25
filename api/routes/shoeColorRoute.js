@@ -16,10 +16,10 @@ router.get('/shoe-colors/:id', shoeColorController.getShoeColorById);
 router.post('/shoe-colors', shoeColorController.createShoeColor);
 
 // Định nghĩa route để cập nhật một màu giày dựa trên ID
-router.put('/shoe-colors/:id', shoeColorController.updateShoeColor);
+router.put('/shoe-colors', shoeColorController.updateShoeColor);
 
 // Định nghĩa route để xóa một màu giày dựa trên ID
-router.delete('/shoe-colors/:id', shoeColorController.deleteShoeColor);
+router.delete('/shoe-colors', shoeColorController.deleteShoeColor);
 
 // Export router
 module.exports = router;
