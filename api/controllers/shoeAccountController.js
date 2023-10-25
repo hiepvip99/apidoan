@@ -160,6 +160,26 @@ const AccountController = {
   },
 
   login(req, res) {
+    // const { username, password } = req.body;
+
+    // const query = `SELECT * FROM shoe_account WHERE username = '${username}' AND password = '${password}'`;
+
+    // db.query(query, (error, results) => {
+    //   if (error) {
+    //     console.error('Lỗi khi thực hiện truy vấn:', error);
+    //     res.status(500).json({ message: 'Đã xảy ra lỗi khi đăng nhập.' });
+    //   } else {
+    //     if (results.length === 0) {
+    //       res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
+    //     } else {
+    //       const data = {
+    //         status: 200,
+    //         data: results[0],
+    //       }
+    //       res.status(200).json(data);
+    //     }
+    //   }
+    // });
     const { username, password } = req.body;
 
     const query = `SELECT * FROM shoe_account WHERE username = '${username}' AND password = '${password}'`;
@@ -172,11 +192,12 @@ const AccountController = {
         if (results.length === 0) {
           res.status(401).json({ message: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
         } else {
-          const data = {
-            status: 200,
-            data: results[0],
+          const account = results[0];
+          if (account.status_id === 1) {
+            res.status(200).json({ message: 'Đăng nhập thành công.', data: account });
+          } else if (account.status_id === 2) {
+            res.status(401).json({ message: 'Tài khoản đã bị khóa.' });
           }
-          res.status(200).json(data);
         }
       }
     });
