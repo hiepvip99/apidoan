@@ -328,6 +328,58 @@ const AccountController = {
     });
   },
 
+  registerUser(req, res) {
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(500).json({ error: "Missing account information" });
+    }
+
+    // Kiểm tra xem tài khoản đã tồn tại trong bảng shoe_account chưa
+    db.query(
+      `SELECT * FROM shoe_account WHERE username = ?`,
+      [username.toLowerCase()],
+      (err, result) => {
+        if (err) {
+          console.error("Error executing query:", err);
+          return res.status(500).json({ error: "Failed to execute query" });
+        }
+
+        if (result && result.length > 0) {
+          // Tài khoản đã tồn tại
+          return res.status(500).json({ error: "Username is already taken" });
+        } else {
+          // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_account
+          const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?)`;
+          const values = [username.toLowerCase(), password, 2, 1]; // Phân quyền là 2 và trạng thái là 1
+
+          db.query(sql, values, (err, result) => {
+            if (err) {
+              console.error("Error adding account:", err);
+              return res.status(500).json({ error: "Failed to add account" });
+            } else {
+              // Lấy ID của tài khoản vừa được thêm vào
+              const accountId = result.insertId;
+
+              // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_customer
+              const customerSql = `INSERT INTO shoe_customer (id_account, email) VALUES (?, ?)`;
+              const customerValues = [accountId, email];
+
+              db.query(customerSql, customerValues, (err, result) => {
+                if (err) {
+                  console.error("Error adding customer:", err);
+                  return res.status(500).json({ error: "Failed to add customer" });
+                } else {
+                  return res.status(200).json({ message: "Account registered successfully" });
+                }
+              });
+            }
+          });
+        }
+      }
+    );
+  },
+
   deleteAccount(req, res) {
     const accountId = req.body.id;
     console.log("da vao del accid: ", accountId);
@@ -356,6 +408,8 @@ const AccountController = {
       }
     });
   },
+
+
 };
 
 module.exports = AccountController;
