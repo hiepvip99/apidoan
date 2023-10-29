@@ -190,7 +190,14 @@ function getShoeCustomerByIdAccount(req, res) {
         res.status(404).json(data);
       } else {
         const shoeCustomer = results[0];
-        shoeCustomer.address = JSON.parse(shoeCustomer.address);
+        try {
+          if (shoeCustomer.address) {
+            shoeCustomer.address = JSON.parse(shoeCustomer.address);
+          }
+        } catch (err) {
+          // Xử lý lỗi tại đây
+          console.error(err);
+        }
         res.status(200).json(shoeCustomer);
       }
     }

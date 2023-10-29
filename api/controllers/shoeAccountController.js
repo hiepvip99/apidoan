@@ -370,7 +370,7 @@ const AccountController = {
                   console.error("Error adding customer:", err);
                   return res.status(500).json({ error: "Failed to add customer" });
                 } else {
-                  return res.status(200).json({ message: "Account registered successfully" });
+                  return res.status(200).json({ message: "Account registered successfully" , status:200});
                 }
               });
             }

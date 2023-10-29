@@ -16,6 +16,8 @@ router.post("/add", accountController.addAccount);
 
 router.post("/login", accountController.login);
 
+router.post("/register", accountController.registerUser);
+
 router.put("/update", accountController.updateAccount);
 
 router.delete("/delete", accountController.deleteAccount);

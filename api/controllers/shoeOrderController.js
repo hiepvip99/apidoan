@@ -554,10 +554,9 @@ const shoeOrderController = {
       !total_price ||
       !status_id ||
       !payment_methods ||
-      !total_quantity || !delivery_address
+      !total_quantity || !delivery_address || delivery_address === ''
     ) {
-      res.status(400).json({ error: "Thiếu thông tin bắt buộc của đơn hàng" });
-      return;
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc của đơn hàng" , status: 400});
     }
 
     // Tạo truy vấn để thêm đơn hàng mới vào bảng `shoe_order`
