@@ -693,6 +693,27 @@ const shoeOrderController = {
   //   );
   // },
 
+  getReview(req, res) {
+    const { customer_id, order_detail_id } = req.query;
+
+    let query = 'SELECT * FROM reviews';
+
+    if (customer_id) {
+      query += ` WHERE customer_id = ${mysql.escape(customer_id)}`;
+    } else if (order_detail_id) {
+      query += ` WHERE order_detail_id = ${mysql.escape(order_detail_id)}`;
+    }
+
+    db.query(query, (error, results, fields) => {
+      if (error) {
+        console.error('Error fetching reviews: ' + error);
+        res.status(500).json({ error: 'Failed to fetch reviews' });
+      } else {
+        res.status(200).json(results);
+      }
+    });
+  },
+
   addReview(req, res) {
     const { product_id, customer_id, order_detail_id, rating, review_text } = req.body;
     const review = {
@@ -710,10 +731,12 @@ const shoeOrderController = {
         res.status(500).json({ error: 'Failed to add review' });
       } else {
         console.log('Review added successfully');
-        res.status(200).json({ message: 'Review added successfully', status:200 });
+        res.status(200).json({ message: 'Review added successfully', status: 200 });
       }
     });
   },
+
+
 
   statusChange(req, res) {
     const id = req.body.id;
