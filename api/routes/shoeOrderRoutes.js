@@ -12,6 +12,8 @@ router.get("/shoeOrderById", shoeOrderController.getById);
 // Định nghĩa route POST /shoeOrders
 router.post("/shoeOrders", shoeOrderController.add);
 
+router.post("/review", shoeOrderController.addReview);
+
 // Định nghĩa route PUT /shoeOrders/:id
 // router.put("/shoeOrders", shoeOrderController.update);
 // Định nghĩa route PUT /shoeOrders/:id

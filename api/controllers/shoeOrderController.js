@@ -556,7 +556,7 @@ const shoeOrderController = {
       !payment_methods ||
       !total_quantity || !delivery_address || delivery_address === ''
     ) {
-      return res.status(400).json({ message: "Thiếu thông tin bắt buộc của đơn hàng" , status: 400});
+      return res.status(400).json({ message: "Thiếu thông tin bắt buộc của đơn hàng", status: 400 });
     }
 
     // Tạo truy vấn để thêm đơn hàng mới vào bảng `shoe_order`
@@ -693,6 +693,28 @@ const shoeOrderController = {
   //   );
   // },
 
+  addReview(req, res) {
+    const { product_id, customer_id, order_detail_id, rating, review_text } = req.body;
+    const review = {
+      product_id,
+      customer_id,
+      order_detail_id,
+      rating,
+      review_text,
+      created_at: Date.now(),
+    };
+
+    db.query('INSERT INTO shoe_review SET ?', review, (error, results, fields) => {
+      if (error) {
+        console.error('Error adding review: ' + error);
+        res.status(500).json({ error: 'Failed to add review' });
+      } else {
+        console.log('Review added successfully');
+        res.status(200).json({ message: 'Review added successfully', status:200 });
+      }
+    });
+  },
+
   statusChange(req, res) {
     const id = req.body.id;
     const status_id = req.body.status_id;
@@ -745,7 +767,7 @@ WHERE o.id = ${id}`, (err, results) => {
         // if (status_id === ) {
         // }
         // Gọi hàm sendNotification
-        
+
       }
     );
   },
@@ -805,6 +827,8 @@ function addNotification(accountId, title, content, notificationToken) {
       });
     console.log('Notification added successfully!');
   });
+
+
 }
 
 module.exports = shoeOrderController;

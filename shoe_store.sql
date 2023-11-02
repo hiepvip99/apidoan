@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 01, 2023 lúc 03:37 PM
+-- Thời gian đã tạo: Th10 02, 2023 lúc 02:40 PM
 -- Phiên bản máy phục vụ: 10.4.28-MariaDB
 -- Phiên bản PHP: 8.2.4
 
@@ -473,6 +473,7 @@ CREATE TABLE `shoe_review` (
   `id` int(11) NOT NULL,
   `product_id` int(11) DEFAULT NULL,
   `customer_id` int(11) DEFAULT NULL,
+  `order_detail_id` int(11) DEFAULT NULL,
   `rating` float DEFAULT NULL,
   `review_text` text DEFAULT NULL,
   `created_at` datetime DEFAULT NULL
