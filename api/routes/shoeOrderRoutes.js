@@ -14,6 +14,12 @@ router.post("/shoeOrders", shoeOrderController.add);
 
 router.post("/review", shoeOrderController.addReview);
 
+router.get("/review", shoeOrderController.getReview);
+
+router.get("/getAllReview", shoeOrderController.getAllReview);
+
+router.get("/check_review", shoeOrderController.checkReviewExistence);
+
 // Định nghĩa route PUT /shoeOrders/:id
 // router.put("/shoeOrders", shoeOrderController.update);
 // Định nghĩa route PUT /shoeOrders/:id
