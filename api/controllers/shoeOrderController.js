@@ -707,25 +707,25 @@ const shoeOrderController = {
       }
     });
   },
-
+  
   getReview(req, res) {
     const { order_detail_id, customer_id, step = 10, page = 1 } = req.query;
 
     const pageSize = parseInt(step);
     const startIndex = (parseInt(page) - 1) * pageSize;
 
-    let query = 'SELECT * FROM shoe_review';
+    let query = 'SELECT r.*, c.name AS customer_name, c.image AS customer_image FROM shoe_review r JOIN shoe_customer c ON r.customer_id = c.id';
 
     if (order_detail_id) {
-      query += ` WHERE order_detail_id = ${order_detail_id}`;
+      query += ` WHERE r.order_detail_id = ${order_detail_id}`;
     } else if (customer_id) {
-      query += ` WHERE customer_id = ${customer_id}`;
+      query += ` WHERE r.customer_id = ${customer_id}`;
     } else {
       res.status(400).json({ error: 'Missing query parameter' });
       return;
     }
 
-    const countQuery = query.replace('*', 'COUNT(*) AS total');
+    const countQuery = query.replace('r.*, c.name AS customer_name, c.image AS customer_image', 'COUNT(*) AS total');
 
     db.query(countQuery, (error, countResults) => {
       if (error) {
@@ -754,6 +754,52 @@ const shoeOrderController = {
       });
     });
   },
+  // getReview(req, res) {
+  //   const { order_detail_id, customer_id, step = 10, page = 1 } = req.query;
+
+  //   const pageSize = parseInt(step);
+  //   const startIndex = (parseInt(page) - 1) * pageSize;
+
+  //   let query = 'SELECT * FROM shoe_review';
+
+  //   if (order_detail_id) {
+  //     query += ` WHERE order_detail_id = ${order_detail_id}`;
+  //   } else if (customer_id) {
+  //     query += ` WHERE customer_id = ${customer_id}`;
+  //   } else {
+  //     res.status(400).json({ error: 'Missing query parameter' });
+  //     return;
+  //   }
+
+  //   const countQuery = query.replace('*', 'COUNT(*) AS total');
+
+  //   db.query(countQuery, (error, countResults) => {
+  //     if (error) {
+  //       console.error('Error fetching reviews count: ' + error);
+  //       res.status(500).json({ error: 'Failed to fetch reviews count' });
+  //       return;
+  //     }
+
+  //     const totalReviews = countResults[0].total;
+  //     const totalPages = Math.ceil(totalReviews / pageSize);
+
+  //     query += ` LIMIT ${startIndex}, ${pageSize}`;
+
+  //     db.query(query, (error, results, fields) => {
+  //       if (error) {
+  //         console.error('Error fetching reviews: ' + error);
+  //         res.status(500).json({ error: 'Failed to fetch reviews' });
+  //       } else {
+  //         res.status(200).json({
+  //           reviews: results,
+  //           currentPage: parseInt(page),
+  //           step: parseInt(step),
+  //           totalPages: totalPages
+  //         });
+  //       }
+  //     });
+  //   });
+  // },
 
   // getReview(req, res) {
   // const { order_detail_id, customer_id } = req.query;
@@ -783,12 +829,14 @@ const shoeOrderController = {
   getAllReview(req, res) {
     const { product_id, rating, step = 10, page = 1 } = req.query;
 
-    let query = 'SELECT * FROM shoe_review';
+    let query = 'SELECT r.*, c.name AS customer_name, c.image AS customer_image FROM shoe_review r';
     let condition = '';
 
     if (product_id) {
-      query += ` WHERE product_id = ${product_id}`;
+      query += ` JOIN shoe_customer c ON r.customer_id = c.id WHERE r.product_id = ${product_id}`;
       condition = `WHERE product_id = ${product_id}`;
+    } else {
+      query += ' JOIN shoe_customer c ON r.customer_id = c.id';
     }
 
     const startIndex = (parseInt(page) - 1) * parseInt(step);
@@ -800,7 +848,7 @@ const shoeOrderController = {
         res.status(500).json({ error: 'Failed to fetch reviews' });
       } else {
         if (!rating) {
-          const ratingCountQuery = `SELECT rating, COUNT(*) AS count FROM shoe_review ${condition} GROUP BY rating`;
+          const ratingCountQuery = `SELECT r.rating, COUNT(*) AS count FROM shoe_review r ${condition} GROUP BY r.rating`;
           db.query(ratingCountQuery, (error, ratingCountResults, fields) => {
             if (error) {
               console.error('Error fetching rating count: ' + error);
@@ -853,6 +901,79 @@ const shoeOrderController = {
       }
     });
   },
+  // getAllReview(req, res) {
+  //   const { product_id, rating, step = 10, page = 1 } = req.query;
+
+  //   let query = 'SELECT * FROM shoe_review';
+  //   let condition = '';
+
+  //   if (product_id) {
+  //     query += ` WHERE product_id = ${product_id}`;
+  //     condition = `WHERE product_id = ${product_id}`;
+  //   }
+
+  //   const startIndex = (parseInt(page) - 1) * parseInt(step);
+  //   query += ` LIMIT ${startIndex}, ${parseInt(step)}`;
+
+  //   db.query(query, (error, results, fields) => {
+  //     if (error) {
+  //       console.error('Error fetching reviews: ' + error);
+  //       res.status(500).json({ error: 'Failed to fetch reviews' });
+  //     } else {
+  //       if (!rating) {
+  //         const ratingCountQuery = `SELECT rating, COUNT(*) AS count FROM shoe_review ${condition} GROUP BY rating`;
+  //         db.query(ratingCountQuery, (error, ratingCountResults, fields) => {
+  //           if (error) {
+  //             console.error('Error fetching rating count: ' + error);
+  //             res.status(500).json({ error: 'Failed to fetch rating count' });
+  //           } else {
+  //             const ratingCounts = {
+  //               star1: 0,
+  //               star2: 0,
+  //               star3: 0,
+  //               star4: 0,
+  //               star5: 0
+  //             };
+  //             let totalRatings = 0;
+  //             let totalStars = 0;
+
+  //             ratingCountResults.forEach((row) => {
+  //               const rating = `star${row.rating}`;
+  //               ratingCounts[rating] = row.count;
+  //               totalRatings += row.count;
+  //               totalStars += row.count * row.rating;
+  //             });
+
+  //             const averageRating = totalRatings > 0 ? totalStars / totalRatings : 0;
+
+  //             const totalCountQuery = `SELECT COUNT(*) AS total FROM shoe_review ${condition}`;
+  //             db.query(totalCountQuery, (error, totalCountResults) => {
+  //               if (error) {
+  //                 console.error('Error fetching total count: ' + error);
+  //                 res.status(500).json({ error: 'Failed to fetch total count' });
+  //               } else {
+  //                 const totalReviews = totalCountResults[0].total;
+  //                 const totalPages = Math.ceil(totalReviews / parseInt(step));
+
+  //                 res.status(200).json({
+  //                   reviews: results,
+  //                   rating_counts: ratingCounts,
+  //                   average_rating: averageRating,
+  //                   total_rating: totalRatings,
+  //                   currentPage: parseInt(page),
+  //                   step: parseInt(step),
+  //                   totalPages: totalPages
+  //                 });
+  //               }
+  //             });
+  //           }
+  //         });
+  //       } else {
+  //         res.status(200).json(results);
+  //       }
+  //     }
+  //   });
+  // },
   // getAllReview(req, res) {
   //   const { product_id, rating, step = 10, page = 1 } = req.query;
 
