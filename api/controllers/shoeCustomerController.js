@@ -318,6 +318,37 @@ function createShoeCustomer(req, res) {
 //   );
 // }
 
+function checkCustomerInfo(req, res) {
+  // API endpoint để kiểm tra thông tin
+    const accountId = req.body.accountId;
+
+    if (!accountId) {
+      res.status(400).json({ error: 'Missing accountId' });
+      return;
+    }
+
+    const sql = `SELECT name, phone_number FROM shoe_customer WHERE id_account = ?`;
+    db.query(sql, [accountId], (err, result) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+      } else {
+        if (result.length > 0) {
+          const row = result[0];
+          const name = row.name;
+          const phone_number = row.phone_number;
+
+          if (name !== null && phone_number !== null && name !== "" && phone_number !== "") {
+            res.json({ hasUpdateInfomation: false });
+          } else {
+            res.json({ hasUpdateInfomation: true });
+          }
+        } else {
+          res.status(404).json({ error: 'Account not found' });
+        }
+      }
+    });
+}
+
 // Controller để cập nhật một khách hàng giày dựa trên ID
 function updateShoeCustomer(req, res) {
   // const customerId = req.params.id; // Lấy id khách hàng từ request params
@@ -503,4 +534,5 @@ module.exports = {
   updateAddress,
   updateNotificationToken,
   getNotificationByAccountId,
+  checkCustomerInfo,
 };
