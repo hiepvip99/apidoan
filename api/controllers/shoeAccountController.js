@@ -1,4 +1,27 @@
 const db = require("../databases/db");
+const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const randomstring = require('randomstring');
+
+
+// Mock database for demonstration purposes
+let users = [
+  { id: 1, username: 'exampleuser', email: 'example@email.com', resetToken: null },
+  // Add more user data as needed
+];
+
+// Nodemailer setup
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'your.email@gmail.com',
+    pass: 'your-email-password',
+  },
+});
+
+// Object to store reset tokens and their expiration timers
+let resetTokens = {};
+
 
 const AccountController = {
   getAccountStatusById(req, res) {
@@ -182,7 +205,7 @@ const AccountController = {
     // });
     const { username, password } = req.body;
 
-    const query = `SELECT * FROM shoe_account WHERE username = '${username}' AND password = '${password}'`;
+    const query = `SELECT * FROM shoe_account WHERE username = '${username.toLowerCase()}' AND password = '${password}'`;
 
     db.query(query, (error, results) => {
       if (error) {
@@ -335,50 +358,118 @@ const AccountController = {
       return res.status(500).json({ error: "Missing account information" });
     }
 
-    // Kiểm tra xem tài khoản đã tồn tại trong bảng shoe_account chưa
+    // Kiểm tra xem email đã tồn tại trong bảng shoe_customer
     db.query(
-      `SELECT * FROM shoe_account WHERE username = ?`,
-      [username.toLowerCase()],
-      (err, result) => {
+      `SELECT * FROM shoe_customer WHERE email = ?`,
+      [email],
+      (err, emailResult) => {
         if (err) {
-          console.error("Error executing query:", err);
-          return res.status(500).json({ error: "Failed to execute query" });
+          console.error("Error executing email query:", err);
+          return res.status(500).json({ error: "Failed to execute email query" });
         }
 
-        if (result && result.length > 0) {
-          // Tài khoản đã tồn tại
-          return res.status(500).json({ error: "Username is already taken" });
+        if (emailResult && emailResult.length > 0) {
+          // Email đã tồn tại
+          return res.status(500).json({ message: "Email is already registered", status: 500 });
         } else {
-          // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_account
-          const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?)`;
-          const values = [username.toLowerCase(), password, 2, 1]; // Phân quyền là 2 và trạng thái là 1
+          // Kiểm tra xem tài khoản đã tồn tại trong bảng shoe_account chưa
+          db.query(
+            `SELECT * FROM shoe_account WHERE username = ?`,
+            [username.toLowerCase()],
+            (err, result) => {
+              if (err) {
+                console.error("Error executing username query:", err);
+                return res.status(500).json({ error: "Failed to execute username query" });
+              }
 
-          db.query(sql, values, (err, result) => {
-            if (err) {
-              console.error("Error adding account:", err);
-              return res.status(500).json({ error: "Failed to add account" });
-            } else {
-              // Lấy ID của tài khoản vừa được thêm vào
-              const accountId = result.insertId;
+              if (result && result.length > 0) {
+                // Tài khoản đã tồn tại
+                return res.status(500).json({ error: "Username is already taken" });
+              } else {
+                // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_account
+                const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?`;
+                const values = [username.toLowerCase(), password, 2, 1];
 
-              // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_customer
-              const customerSql = `INSERT INTO shoe_customer (id_account, email) VALUES (?, ?)`;
-              const customerValues = [accountId, email];
+                db.query(sql, values, (err, result) => {
+                  if (err) {
+                    console.error("Error adding account:", err);
+                    return res.status(500).json({ error: "Failed to add account" });
+                  } else {
+                    // Lấy ID của tài khoản vừa được thêm vào
+                    const accountId = result.insertId;
 
-              db.query(customerSql, customerValues, (err, result) => {
-                if (err) {
-                  console.error("Error adding customer:", err);
-                  return res.status(500).json({ error: "Failed to add customer" });
-                } else {
-                  return res.status(200).json({ message: "Account registered successfully" , status:200});
-                }
-              });
+                    // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_customer
+                    const customerSql = `INSERT INTO shoe_customer (id_account, email) VALUES (?, ?)`;
+                    const customerValues = [accountId, email];
+
+                    db.query(customerSql, customerValues, (err, result) => {
+                      if (err) {
+                        console.error("Error adding customer:", err);
+                        return res.status(500).json({ error: "Failed to add customer" });
+                      } else {
+                        return res.status(200).json({ message: "Account registered successfully", status: 200 });
+                      }
+                    });
+                  }
+                });
+              }
             }
-          });
+          );
         }
       }
     );
   },
+  // registerUser(req, res) {
+  //   const { username, email, password } = req.body;
+
+  //   if (!username || !email || !password) {
+  //     return res.status(500).json({ error: "Missing account information" });
+  //   }
+
+  //   // Kiểm tra xem tài khoản đã tồn tại trong bảng shoe_account chưa
+  //   db.query(
+  //     `SELECT * FROM shoe_account WHERE username = ?`,
+  //     [username.toLowerCase()],
+  //     (err, result) => {
+  //       if (err) {
+  //         console.error("Error executing query:", err);
+  //         return res.status(500).json({ error: "Failed to execute query" });
+  //       }
+
+  //       if (result && result.length > 0) {
+  //         // Tài khoản đã tồn tại
+  //         return res.status(500).json({ error: "Username is already taken" });
+  //       } else {
+  //         // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_account
+  //         const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?)`;
+  //         const values = [username.toLowerCase(), password, 2, 1]; // Phân quyền là 2 và trạng thái là 1
+
+  //         db.query(sql, values, (err, result) => {
+  //           if (err) {
+  //             console.error("Error adding account:", err);
+  //             return res.status(500).json({ error: "Failed to add account" });
+  //           } else {
+  //             // Lấy ID của tài khoản vừa được thêm vào
+  //             const accountId = result.insertId;
+
+  //             // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_customer
+  //             const customerSql = `INSERT INTO shoe_customer (id_account, email) VALUES (?, ?)`;
+  //             const customerValues = [accountId, email];
+
+  //             db.query(customerSql, customerValues, (err, result) => {
+  //               if (err) {
+  //                 console.error("Error adding customer:", err);
+  //                 return res.status(500).json({ error: "Failed to add customer" });
+  //               } else {
+  //                 return res.status(200).json({ message: "Account registered successfully" , status:200});
+  //               }
+  //             });
+  //           }
+  //         });
+  //       }
+  //     }
+  //   );
+  // },
 
   deleteAccount(req, res) {
     const accountId = req.body.id;
@@ -409,7 +500,184 @@ const AccountController = {
     });
   },
 
+  forgotPass(req, res) {
+    const { email } = req.body;
+
+    // SQL query to check if the email exists in the shoe_customer table
+    const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
+
+    // Execute the query with the email parameter
+    db.query(sqlQuery, [email], (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      // Check if the query returned any rows (customer with the given email)
+      const customer = results[0];
+
+      if (!customer) {
+        return res.status(404).json({ message: 'Không tìm thấy email!' });
+      }
+
+      // Generate a random 6-digit token
+      const resetToken = randomstring.generate({ length: 6, charset: 'numeric' });
+
+      // Store the token in the resetTokens object with a 5-minute expiration
+      resetTokens[email] = {
+        token: resetToken,
+        expiration: Date.now() + 5 * 60 * 1000, // 5 minutes in milliseconds
+      };
+
+      // Compose the email
+      const mailOptions = {
+        from: 'fidevang5@gmail.com',
+        to: email,
+        subject: 'Password Reset Confirmation Code',
+        text: `Your confirmation code is: ${resetToken}`,
+      };
+
+      // Tạo transporter với tùy chọn rejectUnauthorized tắt
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'fidevang5@gmail.com',
+          pass: 'gkmg mfzv gdxy atdk',
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
+
+      // Gửi email
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ error: 'Failed to send confirmation code email' });
+        }
+
+        console.log('Email sent: ' + info.response);
+        res.json({ success: true });
+      });
+
+      // const mailOptions = {
+      //   from: 'firevang4@gmail.com',
+      //   to: email,
+      //   subject: 'Password Reset Confirmation Code',
+      //   text: `Your confirmation code is: ${resetToken}`,
+      // };
+
+      // // Send the email
+      // transporter.sendMail(mailOptions, (error, info) => {
+      //   if (error) {
+      //     console.error(error);
+      //     return res.status(500).json({ error: 'Failed to send confirmation code email' });
+      //   }
+
+      //   console.log('Email sent: ' + info.response);
+      //   res.json({ success: true });
+      // });
+    });
+  },
+
+  resetPassword(req, res) {
+    const { email, confirmationCode } = req.body;
+
+    // SQL query to check if the token exists and has not expired
+    const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
+
+    // Execute the query with the email parameter
+    db.query(sqlQuery, [email], (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      // Check if the query returned any rows (customer with the given email)
+      const customer = results[0];
+
+      if (!customer) {
+        return res.status(400).json({ error: 'Invalid confirmation code' });
+      }
+
+      // Check if the token exists and has not expired
+      const storedToken = resetTokens[email];
+      if (!storedToken || Date.now() > storedToken.expiration || storedToken.token !== confirmationCode) {
+        return res.status(400).json({ error: 'Invalid or expired confirmation code' });
+      }
+
+      // Reset the user's password or perform other necessary actions
+
+      // Clear the resetToken after successful password reset
+      // Assume there is a column named resetToken in the shoe_customer table
+      const updateQuery = `UPDATE shoe_customer SET resetToken = NULL WHERE email = ?`;
+
+      // Execute the update query with the email parameter
+      db.query(updateQuery, [email], (updateError) => {
+        if (updateError) {
+          console.error(updateError);
+          return res.status(500).json({ error: 'Failed to update resetToken in the database' });
+        }
+
+        // Clear the stored token and expiration timer
+        delete resetTokens[email];
+
+        res.json({ hasUpdatePassword: true });
+      });
+    });
+  },
+
+
+  // Check and clear expired tokens every minute
+  clearExpiredTokens() {
+    setInterval(() => {
+      for (const email in resetTokens) {
+        if (Date.now() > resetTokens[email].expiration) {
+          delete resetTokens[email];
+        }
+      }
+    }, 60 * 1000 * 5); // 1 minute in milliseconds
+  },
+
+  updatePassword(req, res) {
+    const { username, newPassword } = req.body;
+
+    // SQL query to get the account ID based on the provided username
+    const selectQuery = 'SELECT id FROM shoe_account WHERE username = ?';
+
+    // Execute the query with the username parameter
+    db.query(selectQuery, [username], (selectError, selectResults) => {
+      if (selectError) {
+        console.error(selectError);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      // Check if the query returned any rows (account with the given username)
+      if (selectResults.length === 0) {
+        return res.status(404).json({ error: 'Username not found in the shoe_account table' });
+      }
+
+      const accountId = selectResults[0].id;
+
+      // Update the password for the found account ID
+      const updateQuery = 'UPDATE shoe_account SET password = ? WHERE id = ?';
+      db.query(updateQuery, [newPassword, accountId], (updateError) => {
+        if (updateError) {
+          console.error(updateError);
+          return res.status(500).json({ error: 'Failed to update password' });
+        }
+
+        console.log('Password updated successfully');
+
+        // You can add additional logic here if needed
+
+        res.json({ success: true });
+      });
+    });
+  },
 
 };
+
+// clearExpiredTokens();
 
 module.exports = AccountController;

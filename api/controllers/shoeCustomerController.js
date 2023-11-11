@@ -335,6 +335,7 @@ function checkCustomerInfo(req, res) {
         if (result.length > 0) {
           const row = result[0];
           const name = row.name;
+          const address = row.address;
           const phone_number = row.phone_number;
 
           if (name !== null && phone_number !== null && name !== "" && phone_number !== "") {

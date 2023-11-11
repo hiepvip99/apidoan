@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const https = require('https');
 
+const agent = new https.Agent({
+    rejectUnauthorized: false,
+});
 const accountController = require("../controllers/shoeAccountController");
 
 // Define shoe routes
@@ -17,6 +21,10 @@ router.post("/add", accountController.addAccount);
 router.post("/login", accountController.login);
 
 router.post("/register", accountController.registerUser);
+
+router.post("/forgotPass", accountController.forgotPass);
+
+router.post("/resetPass", accountController.resetPassword);
 
 router.put("/update", accountController.updateAccount);
 
