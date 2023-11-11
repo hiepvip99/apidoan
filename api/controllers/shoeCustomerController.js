@@ -2,63 +2,133 @@
 const db = require("../databases/db");
 const upload = require("../uploadHelper");
 // Controller để lấy danh sách tất cả khách hàng giày
+// function getAllShoeCustomers(req, res) {
+//   const page = req.query.page || 1;
+//   const step = req.query.step || 10;
+//   const offset = (page - 1) * step;
+//   const keyword = req.query.keyword || "";
+
+//   db.query(
+//     "SELECT COUNT(*) AS total FROM shoe_customer",
+//     (err, countResult) => {
+//       if (err) {
+//         console.error("Error executing MySQL query:", err);
+//         const data = {
+//           status: 500,
+//           error: true,
+//         };
+//         res.status(500).json(data);
+//         return;
+//       }
+//       let total = 1;
+//       if (countResult.length > 0) {
+//         total = countResult[0].total < 1 ? 1 : countResult[0].total;
+//       }
+//       const totalPages = Math.ceil(total / step);
+//       db.query(
+//         `SELECT id, name, phone_number, date_of_birth, email, id_account, address, image FROM shoe_customer WHERE name LIKE '%${keyword}%' LIMIT ${offset}, ${parseInt(
+//           step
+//         )}`,
+//         (err, results) => {
+//           if (err) {
+//             console.error("Error executing MySQL query:", err);
+//             const data = {
+//               status: 500,
+//               error: true,
+//               detail: "Failed to fetch shoe customers",
+//             };
+//             res.status(500).json(data);
+//             return;
+//           }
+//           const modifiedResults = results.map((customer) => {
+//             return {
+//               ...customer,
+//               address: JSON.parse(customer.address),
+//             };
+//           });
+
+//           const data = {
+//             currentPage: parseInt(page),
+//             step: parseInt(step),
+//             totalPages: totalPages,
+//             data: modifiedResults,
+//           };
+//           res.status(200).json(data);
+//         }
+//       );
+//     }
+//   );
+// }
+
+
 function getAllShoeCustomers(req, res) {
   const page = req.query.page || 1;
   const step = req.query.step || 10;
   const offset = (page - 1) * step;
   const keyword = req.query.keyword || "";
 
-  db.query(
-    "SELECT COUNT(*) AS total FROM shoe_customer",
-    (err, countResult) => {
-      if (err) {
-        console.error("Error executing MySQL query:", err);
-        const data = {
-          status: 500,
-          error: true,
-        };
-        res.status(500).json(data);
-        return;
-      }
-      let total = 1;
-      if (countResult.length > 0) {
-        total = countResult[0].total < 1 ? 1 : countResult[0].total;
-      }
-      const totalPages = Math.ceil(total / step);
-      db.query(
-        `SELECT id, name, phone_number, date_of_birth, email, id_account, address FROM shoe_customer WHERE name LIKE '%${keyword}%' LIMIT ${offset}, ${parseInt(
-          step
-        )}`,
-        (err, results) => {
-          if (err) {
-            console.error("Error executing MySQL query:", err);
-            const data = {
-              status: 500,
-              error: true,
-              detail: "Failed to fetch shoe customers",
-            };
-            res.status(500).json(data);
-            return;
-          }
-          const modifiedResults = results.map((customer) => {
-            return {
-              ...customer,
-              address: JSON.parse(customer.address),
-            };
-          });
-
-          const data = {
-            currentPage: parseInt(page),
-            step: parseInt(step),
-            totalPages: totalPages,
-            data: modifiedResults,
-          };
-          res.status(200).json(data);
-        }
-      );
+  // Thực hiện truy vấn để lấy tổng số lượng khách hàng
+  db.query("SELECT COUNT(*) AS total FROM shoe_customer", (err, countResult) => {
+    if (err) {
+      console.error("Error executing MySQL query:", err);
+      const data = {
+        status: 500,
+        error: true,
+      };
+      res.status(500).json(data);
+      return;
     }
-  );
+
+    let total = 1;
+    if (countResult.length > 0) {
+      total = countResult[0].total < 1 ? 1 : countResult[0].total;
+    }
+
+    const totalPages = Math.ceil(total / step);
+
+    // Thực hiện truy vấn để lấy thông tin khách hàng và thống kê đơn hàng
+    db.query(
+      `SELECT c.id, c.name, c.phone_number, c.date_of_birth, c.email, c.id_account, c.address, c.image, 
+                    COUNT(o.id) AS total_order, COALESCE(SUM(CASE WHEN o.status_id = 4 THEN o.total_price ELSE 0 END), 0) AS total_amount_spent
+             FROM shoe_customer c
+             LEFT JOIN shoe_order o ON c.id_account = o.account_id
+             WHERE c.name LIKE '%${keyword}%'
+             GROUP BY c.id
+             LIMIT ${offset}, ${parseInt(step)}`,
+      (err, results) => {
+        if (err) {
+          console.error("Error executing MySQL query:", err);
+          const data = {
+            status: 500,
+            error: true,
+            detail: "Failed to fetch shoe customers",
+          };
+          res.status(500).json(data);
+          return;
+        }
+
+        const modifiedResults = results.map((customer) => {
+          return {
+            ...customer,
+            address: JSON.parse(customer.address),
+          };
+        });
+
+        const data = {
+          currentPage: parseInt(page),
+          step: parseInt(step),
+          totalPages: totalPages,
+          data: modifiedResults,
+        };
+        res.status(200).json(data);
+      }
+    );
+  });
 }
+
+
+
+
 // function getAllShoeCustomers(req, res) {
 //   const page = req.query.page || 1;
 //   const step = req.query.step || 10;
@@ -171,7 +241,17 @@ function updateNotificationToken(req, res) {
 // Controller để lấy một khách hàng giày dựa trên ID
 function getShoeCustomerByIdAccount(req, res) {
   const id = req.query.accountId;
-  const query = "SELECT *, DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS date_of_birth FROM shoe_customer WHERE id_account = ?";
+
+  // Thực hiện truy vấn để lấy thông tin khách hàng và thống kê đơn hàng
+  const query = `
+        SELECT c.id, c.name, c.phone_number, c.date_of_birth, c.email, c.id_account, c.address, c.image, 
+            COUNT(o.id) AS total_order, 
+            COALESCE(SUM(CASE WHEN o.status_id = 4 THEN o.total_price ELSE 0 END), 0) AS total_amount_spent
+        FROM shoe_customer c
+        LEFT JOIN shoe_order o ON c.id_account = o.account_id
+        WHERE c.id_account = ?
+        GROUP BY c.id
+    `;
 
   db.query(query, [id], (error, results) => {
     if (error) {
@@ -203,6 +283,41 @@ function getShoeCustomerByIdAccount(req, res) {
     }
   });
 }
+
+// function getShoeCustomerByIdAccount(req, res) {
+//   const id = req.query.accountId;
+//   const query = "SELECT *, DATE_FORMAT(date_of_birth, '%Y-%m-%d') AS date_of_birth FROM shoe_customer WHERE id_account = ?";
+
+//   db.query(query, [id], (error, results) => {
+//     if (error) {
+//       const data = {
+//         status: 500,
+//         error: true,
+//       };
+//       res.status(500).json(data);
+//     } else {
+//       if (results.length === 0) {
+//         const data = {
+//           status: 404,
+//           detail: "Không tìm thấy khách hàng",
+//           error: true,
+//         };
+//         res.status(404).json(data);
+//       } else {
+//         const shoeCustomer = results[0];
+//         try {
+//           if (shoeCustomer.address) {
+//             shoeCustomer.address = JSON.parse(shoeCustomer.address);
+//           }
+//         } catch (err) {
+//           // Xử lý lỗi tại đây
+//           console.error(err);
+//         }
+//         res.status(200).json(shoeCustomer);
+//       }
+//     }
+//   });
+// }
 
 
 // function getShoeCustomerByIdAccount(req, res) {
