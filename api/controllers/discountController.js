@@ -90,7 +90,7 @@ function applyDiscount(req, res) {
                     console.error('Lỗi khi kiểm tra việc sử dụng mã giảm giá:', error);
                     res.status(500).json({ message: 'Đã xảy ra lỗi khi kiểm tra việc sử dụng mã giảm giá.' });
                 } else if (usageResults.length > 0) {
-                    res.status(400).json({ message: 'Mã giảm giá đã được sử dụng bởi khách hàng này.' });
+                    res.status(400).json({ message: 'Mã giảm giá đã được sử dụng.' });
                 } else {
                     const applyDiscountQuery = `INSERT INTO shoe_discount_customer (customer_id, discount_code) VALUES (${customer_id}, '${discount_code}')`;
 
