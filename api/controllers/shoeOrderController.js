@@ -1225,10 +1225,10 @@ const shoeOrderController = {
   //   }
   // },
 
-
   statusChange(req, res) {
     const id = req.body.id;
     const status_id = req.body.status_id;
+
     if (!id || !status_id) {
       const data = {
         status: 500,
@@ -1236,23 +1236,16 @@ const shoeOrderController = {
       };
       return res.status(500).json(data);
     }
-    db.query(
-      "UPDATE shoe_order SET status_id = ? WHERE id = ?",
-      [status_id, id],
-      (err, results) => {
-        if (err) {
-          console.error("Error executing MySQL query:", err);
-          const data = {
-            status: 500,
-            error: true,
-          };
-          res.status(500).json(data);
-          return;
-        }
 
-        db.query(`SELECT n.notification_token, n.id_account FROM shoe_order o
-JOIN shoe_customer n ON o.account_id = n.id_account
-WHERE o.id = ${id}`, (err, results) => {
+    // Trường hợp status_id là 5 hoặc 6
+    if (status_id === 5 || status_id === 6) {
+      // Thực hiện truy vấn để lấy thông tin từ bảng shoe_order_detail
+      db.query(
+        `SELECT sod.product_id, sod.color_id, sod.size_id, sod.quantity
+        FROM shoe_order_detail sod
+        WHERE sod.order_id = ?`,
+        [id],
+        (err, orderDetailResults) => {
           if (err) {
             console.error("Error executing MySQL query:", err);
             const data = {
@@ -1262,26 +1255,194 @@ WHERE o.id = ${id}`, (err, results) => {
             res.status(500).json(data);
             return;
           }
-          if (results.length > 0) {
-            const notificationToken = results[0].notification_token;
-            const user_account_id = results[0].id_account;
 
-            addNotification(user_account_id, 'Đơn hàng của bạn đã có cập nhật', `Đơn hàng có mã là: ${id} đã có cập nhật mới`, notificationToken);
-            // Tiếp tục xử lý với notificationToken
+          // Thực hiện cập nhật quantity trong bảng shoe_product_size
+          orderDetailResults.forEach((orderDetail) => {
+            const { product_id, color_id, size_id, quantity } = orderDetail;
+            db.query(
+              `UPDATE shoe_product_size
+              SET quantity = quantity + ?
+              WHERE product_id = ? AND color_id = ? AND size_id = ?`,
+              [quantity, product_id, color_id, size_id],
+              (updateErr, updateResults) => {
+                if (updateErr) {
+                  console.error("Error updating shoe_product_size:", updateErr);
+                  const data = {
+                    status: 500,
+                    error: true,
+                  };
+                  res.status(500).json(data);
+                  return;
+                }
+              }
+            );
+          });
+
+          // Tiếp tục xử lý thông báo và trả về kết quả cho người dùng
+          db.query(
+            `UPDATE shoe_order SET status_id = ? WHERE id = ?`,
+            [status_id, id],
+            (updateStatusErr, updateStatusResults) => {
+              if (updateStatusErr) {
+                console.error("Error updating shoe_order status:", updateStatusErr);
+                const data = {
+                  status: 500,
+                  error: true,
+                };
+                res.status(500).json(data);
+                return;
+              }
+
+              db.query(
+                `SELECT n.notification_token, n.id_account 
+              FROM shoe_order o
+              JOIN shoe_customer n ON o.account_id = n.id_account
+              WHERE o.id = ?`,
+                [id],
+                (err, notificationResults) => {
+                  if (err) {
+                    console.error("Error executing MySQL query:", err);
+                    const data = {
+                      status: 500,
+                      error: true,
+                    };
+                    res.status(500).json(data);
+                    return;
+                  }
+
+                  if (notificationResults.length > 0) {
+                    const notificationToken = notificationResults[0].notification_token;
+                    const user_account_id = notificationResults[0].id_account;
+
+                    addNotification(
+                      user_account_id,
+                      'Đơn hàng của bạn đã có cập nhật',
+                      `Đơn hàng có mã là: ${id} đã có cập nhật mới`,
+                      notificationToken
+                    );
+
+                    const data = {
+                      status: 200,
+                      orderDetailResults: orderDetailResults,
+                    };
+
+                    res.status(200).json(data);
+                  }
+                }
+              );
+            }
+          );
+        }
+      );
+    } else {
+      // Trường hợp status_id khác 5 và 6, chỉ cập nhật status_id trong bảng shoe_order
+      db.query(
+        "UPDATE shoe_order SET status_id = ? WHERE id = ?",
+        [status_id, id],
+        (updateErr, updateResults) => {
+          if (updateErr) {
+            console.error("Error executing MySQL query:", updateErr);
             const data = {
-              status: 200,
+              status: 500,
+              error: true,
             };
-            res.status(200).json(data);
+            res.status(500).json(data);
+            return;
           }
-        });
 
-        // if (status_id === ) {
-        // }
-        // Gọi hàm sendNotification
+          // Tiếp tục xử lý thông báo và trả về kết quả cho người dùng
+          db.query(
+            `SELECT n.notification_token, n.id_account 
+                     FROM shoe_order o
+                     JOIN shoe_customer n ON o.account_id = n.id_account
+                     WHERE o.id = ?`,
+            [id],
+            (err, notificationResults) => {
+              if (err) {
+                console.error("Error executing MySQL query:", err);
+                const data = {
+                  status: 500,
+                  error: true,
+                };
+                res.status(500).json(data);
+                return;
+              }
 
-      }
-    );
+              if (notificationResults.length > 0) {
+                const notificationToken = notificationResults[0].notification_token;
+                const user_account_id = notificationResults[0].id_account;
+
+                addNotification(user_account_id, 'Đơn hàng của bạn đã có cập nhật', `Đơn hàng có mã là: ${id} đã có cập nhật mới`, notificationToken);
+
+                const data = {
+                  status: 200,
+                };
+
+                res.status(200).json(data);
+              }
+            }
+          );
+        }
+      );
+    }
   },
+
+//   statusChange(req, res) {
+//     const id = req.body.id;
+//     const status_id = req.body.status_id;
+//     if (!id || !status_id) {
+//       const data = {
+//         status: 500,
+//         detail: "Invalid id or status id",
+//       };
+//       return res.status(500).json(data);
+//     }
+//     db.query(
+//       "UPDATE shoe_order SET status_id = ? WHERE id = ?",
+//       [status_id, id],
+//       (err, results) => {
+//         if (err) {
+//           console.error("Error executing MySQL query:", err);
+//           const data = {
+//             status: 500,
+//             error: true,
+//           };
+//           res.status(500).json(data);
+//           return;
+//         }
+
+//         db.query(`SELECT n.notification_token, n.id_account FROM shoe_order o
+// JOIN shoe_customer n ON o.account_id = n.id_account
+// WHERE o.id = ${id}`, (err, results) => {
+//           if (err) {
+//             console.error("Error executing MySQL query:", err);
+//             const data = {
+//               status: 500,
+//               error: true,
+//             };
+//             res.status(500).json(data);
+//             return;
+//           }
+//           if (results.length > 0) {
+//             const notificationToken = results[0].notification_token;
+//             const user_account_id = results[0].id_account;
+
+//             addNotification(user_account_id, 'Đơn hàng của bạn đã có cập nhật', `Đơn hàng có mã là: ${id} đã có cập nhật mới`, notificationToken);
+//             // Tiếp tục xử lý với notificationToken
+//             const data = {
+//               status: 200,
+//             };
+//             res.status(200).json(data);
+//           }
+//         });
+
+//         // if (status_id === ) {
+//         // }
+//         // Gọi hàm sendNotification
+
+//       }
+//     );
+//   },
 
   getStatusOrder(req, res) {
     db.query(`SELECT * FROM shoe_order_status`, (err, statusResult) => {

@@ -244,13 +244,14 @@ function getShoeCustomerByIdAccount(req, res) {
 
   // Thực hiện truy vấn để lấy thông tin khách hàng và thống kê đơn hàng
   const query = `
-        SELECT c.id, c.name, c.phone_number, c.date_of_birth, c.email, c.id_account, c.address, c.image, 
-            COUNT(o.id) AS total_order, 
-            COALESCE(SUM(CASE WHEN o.status_id = 4 THEN o.total_price ELSE 0 END), 0) AS total_amount_spent
-        FROM shoe_customer c
-        LEFT JOIN shoe_order o ON c.id_account = o.account_id
-        WHERE c.id_account = ?
-        GROUP BY c.id
+        SELECT c.id, c.name, c.phone_number, c.date_of_birth, c.email, c.id_account, c.address, c.image,
+       COUNT(CASE WHEN o.status_id = 4 THEN o.id END) AS total_order,
+       COALESCE(SUM(CASE WHEN o.status_id = 4 THEN o.total_price ELSE 0 END), 0) AS total_amount_spent
+FROM shoe_customer c
+LEFT JOIN shoe_order o ON c.id_account = o.account_id
+WHERE c.id_account = ?
+GROUP BY c.id
+
     `;
 
   db.query(query, [id], (error, results) => {
