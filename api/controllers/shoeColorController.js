@@ -3,27 +3,76 @@ const db = require("../databases/db");
 
 // Controller để lấy danh sách tất cả các màu giày
 function getAllShoeColors(req, res) {
-  const query = 'SELECT * FROM shoe_color ORDER BY name ASC';
-  // console.log("vao all");
-  // Thực hiện truy vấn
-  db.query(query, (error, results) => {
+  const page = req.query.page || 1;
+  const step = req.query.step || 10;
+  const offset = (page - 1) * step;
+  const keyword = req.query.keyword || "";
+
+  // Sử dụng LIKE để thực hiện tìm kiếm theo tên (name)
+  const query = `SELECT * FROM shoe_color 
+                 WHERE name LIKE ? 
+                 ORDER BY name ASC 
+                 LIMIT ?, ?`;
+
+  // Thực hiện truy vấn với keyword được thêm vào dạng %keyword% để thực hiện tìm kiếm mềm
+  db.query(query, [`%${keyword}%`, offset, parseInt(step)], (error, results) => {
     if (error) {
       const data = {
         status: 500,
         error: true,
       };
       res.status(500).json(data);
-      // res.status(500).json({ error: 'Lỗi truy vấn' });
     } else {
-      const data = {
-        status: 200,
-        data: results,
-      };
-      res.status(200).json(data);
-      // res.status(200).json(results);
+      // Sử dụng SELECT COUNT để tính tổng số trang
+      db.query(`SELECT COUNT(*) AS totalCount FROM shoe_color WHERE name LIKE ?`, [`%${keyword}%`], (countError, countResults) => {
+        if (countError) {
+          console.error("Error executing MySQL query:", countError);
+          const data = {
+            status: 500,
+            error: true,
+          };
+          res.status(500).json(data);
+        } else {
+          const totalCount = countResults[0].totalCount;
+          const totalPages = Math.ceil(totalCount / step);
+          // Thêm phần thông tin về phân trang vào data
+          const data = {
+            currentPage: parseInt(page),
+            step: parseInt(step),
+            totalPages: totalPages,
+            data: results,
+          };
+          res.status(200).json(data);
+        }
+      });
     }
   });
 }
+
+
+
+// function getAllShoeColors(req, res) {
+//   const query = 'SELECT * FROM shoe_color ORDER BY name ASC';
+//   // console.log("vao all");
+//   // Thực hiện truy vấn
+//   db.query(query, (error, results) => {
+//     if (error) {
+//       const data = {
+//         status: 500,
+//         error: true,
+//       };
+//       res.status(500).json(data);
+//       // res.status(500).json({ error: 'Lỗi truy vấn' });
+//     } else {
+//       const data = {
+//         status: 200,
+//         data: results,
+//       };
+//       res.status(200).json(data);
+//       // res.status(200).json(results);
+//     }
+//   });
+// }
 
 // Controller để lấy một màu giày dựa trên ID
 function getShoeColorById(req, res) {

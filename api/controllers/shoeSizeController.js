@@ -1,9 +1,17 @@
 const db = require("../databases/db");
 
 function getAllShoeSizes(req, res) {
-  const query = "SELECT * FROM shoe_size ORDER BY name ASC";
+  const page = req.query.page || 1;
+  const step = req.query.step || 10;
+  const offset = (page - 1) * step;
+  const keyword = req.query.keyword || "";
 
-  db.query(query, (error, results) => {
+  const query = `SELECT * FROM shoe_size 
+                 WHERE name LIKE ? 
+                 ORDER BY name ASC 
+                 LIMIT ?, ?`;
+
+  db.query(query, [`%${keyword}%`, offset, parseInt(step)], (error, results) => {
     if (error) {
       const data = {
         status: 500,
@@ -11,14 +19,50 @@ function getAllShoeSizes(req, res) {
       };
       res.status(500).json(data);
     } else {
-      const data = {
-        status: 200,
-        data: results,
-      };
-      res.status(200).json(data);
+      db.query(`SELECT COUNT(*) AS totalCount FROM shoe_size WHERE name LIKE ?`, [`%${keyword}%`], (countError, countResults) => {
+        if (countError) {
+          console.error("Error executing MySQL query:", countError);
+          const data = {
+            status: 500,
+            error: true,
+          };
+          res.status(500).json(data);
+        } else {
+          const totalCount = countResults[0].totalCount;
+          const totalPages = Math.ceil(totalCount / step);
+
+          const data = {
+            currentPage: parseInt(page),
+            step: parseInt(step),
+            totalPages: totalPages,
+            data: results,
+          };
+          res.status(200).json(data);
+        }
+      });
     }
   });
 }
+
+// function getAllShoeSizes(req, res) {
+//   const query = "SELECT * FROM shoe_size ORDER BY name ASC";
+
+//   db.query(query, (error, results) => {
+//     if (error) {
+//       const data = {
+//         status: 500,
+//         error: true,
+//       };
+//       res.status(500).json(data);
+//     } else {
+//       const data = {
+//         status: 200,
+//         data: results,
+//       };
+//       res.status(200).json(data);
+//     }
+//   });
+// }
 
 function getShoeSizeById(req, res) {
   const id = req.params.id;
