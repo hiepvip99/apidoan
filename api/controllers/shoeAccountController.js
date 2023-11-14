@@ -1,8 +1,9 @@
 const db = require("../databases/db");
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const randomstring = require('randomstring');
+const tokenManager = require('./tokenManager');
 
+const resetTokens = {};
 
 // Mock database for demonstration purposes
 let users = [
@@ -19,8 +20,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Object to store reset tokens and their expiration timers
-let resetTokens = {};
+// // Object to store reset tokens and their expiration timers
+
 
 
 const AccountController = {
@@ -500,132 +501,132 @@ const AccountController = {
     });
   },
 
-  forgotPass(req, res) {
-    const { email } = req.body;
+  // forgotPass(req, res) {
+  //   const { email } = req.body;
 
-    // SQL query to check if the email exists in the shoe_customer table
-    const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
+  //   // SQL query to check if the email exists in the shoe_customer table
+  //   const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
 
-    // Execute the query with the email parameter
-    db.query(sqlQuery, [email], (error, results) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Database error' });
-      }
+  //   // Execute the query with the email parameter
+  //   db.query(sqlQuery, [email], (error, results) => {
+  //     if (error) {
+  //       console.error(error);
+  //       return res.status(500).json({ error: 'Database error' });
+  //     }
 
-      // Check if the query returned any rows (customer with the given email)
-      const customer = results[0];
+  //     // Check if the query returned any rows (customer with the given email)
+  //     const customer = results[0];
 
-      if (!customer) {
-        return res.status(404).json({ message: 'Không tìm thấy email!' });
-      }
+  //     if (!customer) {
+  //       return res.status(404).json({ message: 'Không tìm thấy email!' });
+  //     }
 
-      // Generate a random 6-digit token
-      const resetToken = randomstring.generate({ length: 6, charset: 'numeric' });
+  //     // Generate a random 6-digit token
+  //     const resetToken = randomstring.generate({ length: 6, charset: 'numeric' });
 
-      // Store the token in the resetTokens object with a 5-minute expiration
-      resetTokens[email] = {
-        token: resetToken,
-        expiration: Date.now() + 5 * 60 * 1000, // 5 minutes in milliseconds
-      };
+  //     // Store the token in the resetTokens object with a 5-minute expiration
+  //     resetTokens[email] = {
+  //       token: resetToken,
+  //       expiration: Date.now() + 5 * 60 * 1000, // 5 minutes in milliseconds
+  //     };
 
-      // Compose the email
-      const mailOptions = {
-        from: 'fidevang5@gmail.com',
-        to: email,
-        subject: 'Password Reset Confirmation Code',
-        text: `Your confirmation code is: ${resetToken}`,
-      };
+  //     // Compose the email
+  //     const mailOptions = {
+  //       from: 'fidevang5@gmail.com',
+  //       to: email,
+  //       subject: 'Password Reset Confirmation Code',
+  //       text: `Your confirmation code is: ${resetToken}`,
+  //     };
 
-      // Tạo transporter với tùy chọn rejectUnauthorized tắt
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'fidevang5@gmail.com',
-          pass: 'gkmg mfzv gdxy atdk',
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
+  //     // Tạo transporter với tùy chọn rejectUnauthorized tắt
+  //     const transporter = nodemailer.createTransport({
+  //       service: 'gmail',
+  //       auth: {
+  //         user: 'fidevang5@gmail.com',
+  //         pass: 'gkmg mfzv gdxy atdk',
+  //       },
+  //       tls: {
+  //         rejectUnauthorized: false,
+  //       },
+  //     });
 
-      // Gửi email
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.error(error);
-          return res.status(500).json({ error: 'Failed to send confirmation code email' });
-        }
+  //     // Gửi email
+  //     transporter.sendMail(mailOptions, (error, info) => {
+  //       if (error) {
+  //         console.error(error);
+  //         return res.status(500).json({ error: 'Failed to send confirmation code email' });
+  //       }
 
-        console.log('Email sent: ' + info.response);
-        res.json({ success: true });
-      });
+  //       console.log('Email sent: ' + info.response);
+  //       res.json({ success: true });
+  //     });
 
-      // const mailOptions = {
-      //   from: 'firevang4@gmail.com',
-      //   to: email,
-      //   subject: 'Password Reset Confirmation Code',
-      //   text: `Your confirmation code is: ${resetToken}`,
-      // };
+  //     // const mailOptions = {
+  //     //   from: 'firevang4@gmail.com',
+  //     //   to: email,
+  //     //   subject: 'Password Reset Confirmation Code',
+  //     //   text: `Your confirmation code is: ${resetToken}`,
+  //     // };
 
-      // // Send the email
-      // transporter.sendMail(mailOptions, (error, info) => {
-      //   if (error) {
-      //     console.error(error);
-      //     return res.status(500).json({ error: 'Failed to send confirmation code email' });
-      //   }
+  //     // // Send the email
+  //     // transporter.sendMail(mailOptions, (error, info) => {
+  //     //   if (error) {
+  //     //     console.error(error);
+  //     //     return res.status(500).json({ error: 'Failed to send confirmation code email' });
+  //     //   }
 
-      //   console.log('Email sent: ' + info.response);
-      //   res.json({ success: true });
-      // });
-    });
-  },
+  //     //   console.log('Email sent: ' + info.response);
+  //     //   res.json({ success: true });
+  //     // });
+  //   });
+  // },
 
-  resetPassword(req, res) {
-    const { email, confirmationCode } = req.body;
+  // resetPassword(req, res) {
+  //   const { email, confirmationCode } = req.body;
 
-    // SQL query to check if the token exists and has not expired
-    const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
+  //   // SQL query to check if the token exists and has not expired
+  //   const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
 
-    // Execute the query with the email parameter
-    db.query(sqlQuery, [email], (error, results) => {
-      if (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Database error' });
-      }
+  //   // Execute the query with the email parameter
+  //   db.query(sqlQuery, [email], (error, results) => {
+  //     if (error) {
+  //       console.error(error);
+  //       return res.status(500).json({ error: 'Database error' });
+  //     }
 
-      // Check if the query returned any rows (customer with the given email)
-      const customer = results[0];
+  //     // Check if the query returned any rows (customer with the given email)
+  //     const customer = results[0];
 
-      if (!customer) {
-        return res.status(400).json({ error: 'Invalid confirmation code' });
-      }
+  //     if (!customer) {
+  //       return res.status(400).json({ error: 'Invalid confirmation code' });
+  //     }
 
-      // Check if the token exists and has not expired
-      const storedToken = resetTokens[email];
-      if (!storedToken || Date.now() > storedToken.expiration || storedToken.token !== confirmationCode) {
-        return res.status(400).json({ error: 'Invalid or expired confirmation code' });
-      }
+  //     // Check if the token exists and has not expired
+  //     const storedToken = resetTokens[email];
+  //     if (!storedToken || Date.now() > storedToken.expiration || storedToken.token !== confirmationCode) {
+  //       return res.status(400).json({ error: 'Invalid or expired confirmation code' });
+  //     }
 
-      // Reset the user's password or perform other necessary actions
+  //     // Reset the user's password or perform other necessary actions
 
-      // Clear the resetToken after successful password reset
-      // Assume there is a column named resetToken in the shoe_customer table
-      const updateQuery = `UPDATE shoe_customer SET resetToken = NULL WHERE email = ?`;
+  //     // Clear the resetToken after successful password reset
+  //     // Assume there is a column named resetToken in the shoe_customer table
+  //     const updateQuery = `UPDATE shoe_customer SET resetToken = NULL WHERE email = ?`;
 
-      // Execute the update query with the email parameter
-      db.query(updateQuery, [email], (updateError) => {
-        if (updateError) {
-          console.error(updateError);
-          return res.status(500).json({ error: 'Failed to update resetToken in the database' });
-        }
+  //     // Execute the update query with the email parameter
+  //     db.query(updateQuery, [email], (updateError) => {
+  //       if (updateError) {
+  //         console.error(updateError);
+  //         return res.status(500).json({ error: 'Failed to update resetToken in the database' });
+  //       }
 
-        // Clear the stored token and expiration timer
-        delete resetTokens[email];
+  //       // Clear the stored token and expiration timer
+  //       delete resetTokens[email];
 
-        res.json({ hasUpdatePassword: true });
-      });
-    });
-  },
+  //       res.json({ hasUpdatePassword: true });
+  //     });
+  //   });
+  // },
 
 
   // Check and clear expired tokens every minute
@@ -673,6 +674,126 @@ const AccountController = {
 
         res.json({ success: true });
       });
+    });
+  },
+
+  forgotPass(req, res) {
+    const { email } = req.body;
+
+    // SQL query to check if the email exists in the shoe_customer table
+    const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
+
+    // Execute the query with the email parameter
+    db.query(sqlQuery, [email], (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      // Check if the query returned any rows (customer with the given email)
+      const customer = results[0];
+
+      if (!customer) {
+        return res.status(404).json({ message: 'Không tìm thấy email!' });
+      }
+
+      // Generate a random 6-digit token using the tokenManager
+      const resetToken = tokenManager.generateToken(email);
+
+      // Compose the email
+      const mailOptions = {
+        from: 'fidevang5@gmail.com',
+        to: email,
+        subject: 'Password Reset Confirmation Code',
+        text: `Your confirmation code is: ${resetToken}`,
+      };
+
+      // Tạo transporter với tùy chọn rejectUnauthorized tắt
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'fidevang5@gmail.com',
+          pass: 'gkmg mfzv gdxy atdk',
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      });
+
+      // Gửi email
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(error);
+          return res.status(500).json({ error: 'Failed to send confirmation code email' });
+        }
+
+        console.log('Email sent: ' + info.response);
+        res.json({ success: true });
+      });
+    });
+  },
+
+  resetPassword(req, res) {
+    const { email, confirmationCode } = req.body;
+
+    // SQL query to check if the token exists and has not expired
+    const sqlQuery = `SELECT * FROM shoe_customer WHERE email = ?`;
+
+    // Execute the query with the email parameter
+    db.query(sqlQuery, [email], (error, results) => {
+      if (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+
+
+      // Check if the query returned any rows (customer with the given email)
+      const customer = results[0];
+
+      if (!customer) {
+        return res.status(400).json({ error: 'Invalid confirmation code' });
+      }
+
+      // Get the token from the tokenManager
+      const storedToken = tokenManager.getResetToken(email);
+      if (!storedToken) {
+        return res.status(400).json({ error: 'Invalid or expired confirmation code' });;
+      }
+      // console.log('Stored Token Expiration:', storedToken.expiration);
+      // console.log('Current Time:', Date.now());
+      // console.log('confirmationCode :', confirmationCode);
+      // console.log('storedToken.token :', storedToken.token);
+      // console.log('so sanh :', Date.now() < storedToken.expiration);
+
+      // if (!storedToken || Date.now() > storedToken.expiration || storedToken.token !== confirmationCode) {
+      //   return res.status(400).json({ error: 'Invalid or expired confirmation code' });
+      // }
+      return res.status(200).json({ hasUpdatePassword: Date.now() < storedToken.expiration && storedToken.token.trim() === confirmationCode, status: 200 });
+      if (Date.now() < storedToken.expiration && storedToken.token.trim() === confirmationCode) {
+        console.log('da vao if resetPass'),
+        tokenManager.deleteResetToken(email);
+        return res.status(200).json({ hasUpdatePassword: Date.now() < storedToken.expiration && storedToken.token.trim() === confirmationCode, status: 200 });
+      }
+
+      // Reset the user's password or perform other necessary actions
+
+      // Clear the resetToken after successful password reset
+      // Assume there is a column named resetToken in the shoe_customer table
+      // const updateQuery = `UPDATE shoe_customer WHERE email = ?`;
+
+      // // Execute the update query with the email parameter
+      // db.query(updateQuery, [email], (updateError) => {
+      //   if (updateError) {
+      //     console.error(updateError);
+      //     return res.status(500).json({ error: 'Failed to update resetToken in the database' });
+      //   }
+
+      //   // Clear the stored token and expiration timer using the tokenManager
+      //   tokenManager.deleteResetToken(email);
+
+      //   res.json({ hasUpdatePassword: true });
+      // });
     });
   },
 
