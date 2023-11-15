@@ -24,6 +24,8 @@ router.post("/register", accountController.registerUser);
 
 router.post("/forgotPass", accountController.forgotPass);
 
+router.post("/updatePassword", accountController.updatePassword);
+
 router.post("/resetPass", accountController.resetPassword);
 
 router.put("/update", accountController.updateAccount);

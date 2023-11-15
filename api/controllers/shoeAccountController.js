@@ -728,7 +728,7 @@ const AccountController = {
         }
 
         console.log('Email sent: ' + info.response);
-        res.json({ success: true });
+        res.json({ success: true , status: 200});
       });
     });
   },
