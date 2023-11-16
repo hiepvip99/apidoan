@@ -641,28 +641,31 @@ const AccountController = {
   },
 
   updatePassword(req, res) {
-    const { username, newPassword } = req.body;
+    console.log("đã vào updatePassword");
+    const { email, password } = req.body;
 
-    // SQL query to get the account ID based on the provided username
-    const selectQuery = 'SELECT id FROM shoe_account WHERE username = ?';
+    console.log("đã vào newPassword : ", password);
+    console.log("đã vào email : ", email);
+    // SQL query to get the account ID based on the provided email from shoe_customer table
+    const selectQuery = 'SELECT id_account FROM shoe_customer WHERE email = ?';
 
-    // Execute the query with the username parameter
-    db.query(selectQuery, [username], (selectError, selectResults) => {
+    // Execute the query with the email parameter
+    db.query(selectQuery, [email], (selectError, selectResults) => {
       if (selectError) {
         console.error(selectError);
         return res.status(500).json({ error: 'Database error' });
       }
 
-      // Check if the query returned any rows (account with the given username)
+      // Check if the query returned any rows (account with the given email)
       if (selectResults.length === 0) {
-        return res.status(404).json({ error: 'Username not found in the shoe_account table' });
+        return res.status(404).json({ error: 'Email not found in the shoe_customer table' });
       }
 
-      const accountId = selectResults[0].id;
+      const accountId = selectResults[0].id_account;
 
-      // Update the password for the found account ID
+      // Update the password for the found account ID in shoe_account table
       const updateQuery = 'UPDATE shoe_account SET password = ? WHERE id = ?';
-      db.query(updateQuery, [newPassword, accountId], (updateError) => {
+      db.query(updateQuery, [password, accountId], (updateError) => {
         if (updateError) {
           console.error(updateError);
           return res.status(500).json({ error: 'Failed to update password' });
@@ -672,10 +675,48 @@ const AccountController = {
 
         // You can add additional logic here if needed
 
-        res.json({ success: true });
+        res.json({ success: true , status:200});
       });
     });
-  },
+  }
+,
+
+  // updatePassword(req, res) {
+  //   const { username, newPassword } = req.body;
+
+  //   // SQL query to get the account ID based on the provided username
+  //   const selectQuery = 'SELECT id FROM shoe_account WHERE username = ?';
+
+  //   // Execute the query with the username parameter
+  //   db.query(selectQuery, [username], (selectError, selectResults) => {
+  //     if (selectError) {
+  //       console.error(selectError);
+  //       return res.status(500).json({ error: 'Database error' });
+  //     }
+
+  //     // Check if the query returned any rows (account with the given username)
+  //     if (selectResults.length === 0) {
+  //       return res.status(404).json({ error: 'Username not found in the shoe_account table' });
+  //     }
+
+  //     const accountId = selectResults[0].id;
+
+  //     // Update the password for the found account ID
+  //     const updateQuery = 'UPDATE shoe_account SET password = ? WHERE id = ?';
+  //     db.query(updateQuery, [newPassword, accountId], (updateError) => {
+  //       if (updateError) {
+  //         console.error(updateError);
+  //         return res.status(500).json({ error: 'Failed to update password' });
+  //       }
+
+  //       console.log('Password updated successfully');
+
+  //       // You can add additional logic here if needed
+
+  //       res.json({ success: true });
+  //     });
+  //   });
+  // },
 
   forgotPass(req, res) {
     const { email } = req.body;
