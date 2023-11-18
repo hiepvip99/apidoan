@@ -19,6 +19,7 @@ router.get("/review", shoeOrderController.getReview);
 router.get("/getAllReview", shoeOrderController.getAllReview);
 
 router.get("/check_review", shoeOrderController.checkReviewExistence);
+router.get("/max_id", shoeOrderController.getMaxId);
 
 // Định nghĩa route PUT /shoeOrders/:id
 // router.put("/shoeOrders", shoeOrderController.update);

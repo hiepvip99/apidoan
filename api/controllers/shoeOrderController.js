@@ -2,6 +2,25 @@ const db = require("../databases/db");
 const { sendNotification, sendNotificationWithToken } = require("../firebase-notification");
 
 const shoeOrderController = {
+
+  getMaxId(req, res) {
+    const query = 'SELECT MAX(id) AS maxId FROM shoe_order';
+
+    db.query(query, (err, results) => {
+      if (err) {
+        console.error('Error executing query:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+        return;
+      }
+
+      // Lấy giá trị maxId từ kết quả truy vấn
+      const maxId = results[0].maxId;
+
+      // Trả về JSON với maxId
+      res.json({ maxId });
+    });
+  },
+
   getById(req, res) {
     const id = req.query.id;
 
