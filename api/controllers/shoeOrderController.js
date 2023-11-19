@@ -274,8 +274,11 @@ const shoeOrderController = {
         // Truy vấn tất cả các đơn hàng từ bảng `shoe_order`
         const getAllOrdersQuery = `
     SELECT *
-    FROM shoe_order WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'
-  `;
+    FROM shoe_order 
+    WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'
+    LIMIT ${parseInt(offset)}, ${parseInt(step)};
+`;
+
 
         db.query(getAllOrdersQuery, (err, orderResults) => {
           if (err) {
