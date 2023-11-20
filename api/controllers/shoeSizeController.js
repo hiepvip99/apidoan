@@ -91,23 +91,69 @@ function getShoeSizeById(req, res) {
 
 function createShoeSize(req, res) {
   const { name } = req.body;
-  const query = "INSERT INTO shoe_size (name) VALUES (?)";
 
-  db.query(query, [name], (error, results) => {
+  // Kiểm tra trùng lặp trước khi thêm dữ liệu mới
+  const checkDuplicateQuery = "SELECT * FROM shoe_size WHERE name = ?";
+  db.query(checkDuplicateQuery, [name], (error, results) => {
     if (error) {
       const data = {
         status: 500,
         error: true,
+        message: "Internal Server Error",
       };
       res.status(500).json(data);
     } else {
-      const data = {
-        status: 200,
-      };
-      res.status(200).json(data);
+      if (results.length > 0) {
+        // Nếu đã tồn tại giá trị trong bảng, trả về thông báo lỗi
+        const data = {
+          status: 400,
+          error: true,
+          message: "Lỗi đã trùng tên",
+        };
+        res.status(400).json(data);
+      } else {
+        // Nếu chưa tồn tại giá trị, thêm dữ liệu mới vào bảng
+        const insertQuery = "INSERT INTO shoe_size (name) VALUES (?)";
+        db.query(insertQuery, [name], (error, results) => {
+          if (error) {
+            const data = {
+              status: 500,
+              error: true,
+              message: "Internal Server Error",
+            };
+            res.status(500).json(data);
+          } else {
+            const data = {
+              status: 200,
+              message: "Shoe size added successfully",
+            };
+            res.status(200).json(data);
+          }
+        });
+      }
     }
   });
 }
+
+// function createShoeSize(req, res) {
+//   const { name } = req.body;
+//   const query = "INSERT INTO shoe_size (name) VALUES (?)";
+
+//   db.query(query, [name], (error, results) => {
+//     if (error) {
+//       const data = {
+//         status: 500,
+//         error: true,
+//       };
+//       res.status(500).json(data);
+//     } else {
+//       const data = {
+//         status: 200,
+//       };
+//       res.status(200).json(data);
+//     }
+//   });
+// }
 
 function updateShoeSize(req, res) {
   const id = req.params.id;
@@ -131,7 +177,7 @@ function updateShoeSize(req, res) {
 }
 
 function deleteShoeSize(req, res) {
-  const id = req.params.id;
+  const id = req.body.id;
   const query = "DELETE FROM shoe_size WHERE id = ?";
 
   db.query(query, [id], (error, results) => {

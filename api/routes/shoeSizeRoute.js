@@ -19,7 +19,7 @@ router.post('/shoe-sizes', shoeSizeController.createShoeSize);
 router.put('/shoe-sizes/:id', shoeSizeController.updateShoeSize);
 
 // Định nghĩa route để xóa một màu giày dựa trên ID
-router.delete('/shoe-sizes/:id', shoeSizeController.deleteShoeSize);
+router.delete('/shoe-sizes', shoeSizeController.deleteShoeSize);
 
 // Export router
 module.exports = router;

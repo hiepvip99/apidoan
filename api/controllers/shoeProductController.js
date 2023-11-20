@@ -477,7 +477,7 @@ const shoeProductController = {
     // const product_color = req.files.;
 
     console.log("product_color: ", product_color);
-    console.log("req.files: ", req.files);
+    // console.log("req.files: ", req.files);
 
     // const imageUrls = Object.values(req.files).map((file) => file.path);
     // Kiểm tra các trường thông tin bắt buộc của sản phẩm
