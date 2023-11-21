@@ -19,7 +19,8 @@ function getAllShoeSizes(req, res) {
       };
       res.status(500).json(data);
     } else {
-      db.query(`SELECT COUNT(*) AS totalCount FROM shoe_size WHERE name LIKE ?`, [`%${keyword}%`], (countError, countResults) => {
+      db.query(`SELECT COUNT(*) AS totalCount FROM shoe_size WHERE name LIKE ? ORDER BY name ASC 
+                 LIMIT ?, ?`, [`%${keyword}%`, offset, parseInt(step)], (countError, countResults) => {
         if (countError) {
           console.error("Error executing MySQL query:", countError);
           const data = {
