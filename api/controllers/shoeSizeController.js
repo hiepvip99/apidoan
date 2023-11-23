@@ -29,8 +29,15 @@ function getAllShoeSizes(req, res) {
           };
           res.status(500).json(data);
         } else {
-          const totalCount = countResults[0].totalCount;
-          const totalPages = Math.ceil(totalCount / step);
+          let total = 1;
+          if (countResults.length > 0) {
+            total = countResults[0].total < 1 ? 1 : countResults[0].total;
+          }
+          const totalPages = Math.ceil(total / step);
+          // const total = countResult[0].total || 0;
+
+          // const totalCount = countResults[0].totalCount;
+          // const totalPages = Math.ceil(totalCount / step);
 
           const data = {
             currentPage: parseInt(page),

@@ -33,8 +33,13 @@ function getAllShoeColors(req, res) {
           };
           res.status(500).json(data);
         } else {
-          const totalCount = countResults[0].totalCount;
-          const totalPages = Math.ceil(totalCount / step);
+          let total = 1;
+          if (countResults.length > 0) {
+            total = countResults[0].total < 1 ? 1 : countResults[0].total;
+          }
+          const totalPages = Math.ceil(total / step);
+          // const totalCount = countResults[0].totalCount;
+          // const totalPages = Math.ceil(totalCount / step);
           // Thêm phần thông tin về phân trang vào data
           const data = {
             currentPage: parseInt(page),
