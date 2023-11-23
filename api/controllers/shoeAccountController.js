@@ -116,7 +116,7 @@ const AccountController = {
     // console.log("keyword:", keyword);
     db.query(
       `SELECT COUNT(*) AS total FROM shoe_account WHERE username LIKE 
-      '%${keyword}%' LIMIT ${offset}, ${parseInt(step)}`,
+      '%${keyword}%'`,
       (err, countResult) => {
         if (err) {
           console.error("Error executing MySQL query:", err);

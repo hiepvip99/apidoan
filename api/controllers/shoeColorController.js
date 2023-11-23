@@ -24,7 +24,7 @@ function getAllShoeColors(req, res) {
       res.status(500).json(data);
     } else {
       // Sử dụng SELECT COUNT để tính tổng số trang
-      db.query(`SELECT COUNT(*) AS totalCount FROM shoe_color WHERE name LIKE ?`, [`%${keyword}%`], (countError, countResults) => {
+      db.query(`SELECT COUNT(*) AS total FROM shoe_color WHERE name LIKE ?`, [`%${keyword}%`], (countError, countResults) => {
         if (countError) {
           console.error("Error executing MySQL query:", countError);
           const data = {

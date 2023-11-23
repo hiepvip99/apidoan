@@ -8,7 +8,8 @@ const ShoeController = {
     const keyword = req.query.keyword || "";
     // console.log("keyword:", keyword);
     db.query(
-      "SELECT COUNT(*) AS total FROM shoe_category",
+      `SELECT COUNT(*) AS total FROM shoe_category where name like 
+      '${`%${keyword}%`}'`,
       (err, countResult) => {
         if (err) {
           console.error("Error executing MySQL query:", err);
