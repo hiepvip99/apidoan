@@ -302,7 +302,7 @@ const shoeProductController = {
       condition += ` AND gender = '${gender}'`;
     }
 
-    console.log("condition", condition);
+    // console.log("condition", condition);
 
     db.query(
       `SELECT COUNT(*) AS total FROM shoe_product ${condition}`,

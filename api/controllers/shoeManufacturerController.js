@@ -35,9 +35,9 @@ const shoeManufacturerController = {
     const step = req.query.step || 10;
     const offset = (page - 1) * step;
     const keyword = req.query.keyword || "";
-    console.log("keyword:", keyword);
+    // console.log("keyword:", keyword);
     db.query(
-      "SELECT COUNT(*) AS total FROM shoe_manufacturer",
+      `SELECT COUNT(*) AS total FROM shoe_manufacturer WHERE name LIKE '${`%${keyword}%`}'`,
       (err, countResult) => {
         if (err) {
           console.error("Error executing MySQL query:", err);

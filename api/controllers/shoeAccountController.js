@@ -113,7 +113,7 @@ const AccountController = {
     const step = req.query.step || 10;
     const offset = (parseInt(page) - 1) * parseInt(step);
     const keyword = req.query.keyword || "";
-    console.log("keyword:", keyword);
+    // console.log("keyword:", keyword);
     db.query(
       `SELECT COUNT(*) AS total FROM shoe_account WHERE username LIKE 
       '%${keyword}%' LIMIT ${offset}, ${parseInt(step)}`,
