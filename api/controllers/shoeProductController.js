@@ -665,6 +665,7 @@ const shoeProductController = {
       gender,
       product_size,
       product_color,
+      description,
     } = req.body;
 
     // Kiểm tra trường thông tin bắt buộc `id` của sản phẩm
@@ -678,7 +679,7 @@ const shoeProductController = {
     // Tạo truy vấn để cập nhật thông tin sản phẩm trong bảng `shoe_product`
     const updateProductQuery = `
     UPDATE shoe_product
-    SET name = '${name}', manufacturer_id = ${manufacturer_id}, category_id = ${category_id}, gender = '${gender}'
+    SET name = '${name}', manufacturer_id = ${manufacturer_id}, category_id = ${category_id}, gender = '${gender}', description = '${description}'
     WHERE id = ${id}
   `;
 
