@@ -127,7 +127,7 @@ const AccountController = {
           res.status(500).json(data);
           return;
         }
-        console.log(countResult);
+        // console.log(countResult);
         let total = 1;
         if (countResult.length > 0) {
           total = countResult[0].total < 1 ? 1 : countResult[0].total;
@@ -388,7 +388,7 @@ const AccountController = {
                 return res.status(500).json({ error: "Username is already taken" });
               } else {
                 // Thực hiện truy vấn để thêm bản ghi mới vào bảng shoe_account
-                const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?`;
+                const sql = `INSERT INTO shoe_account (username, password, decentralization_id, status_id) VALUES (?, ?, ?, ?)`;
                 const values = [username.toLowerCase(), password, 2, 1];
 
                 db.query(sql, values, (err, result) => {
