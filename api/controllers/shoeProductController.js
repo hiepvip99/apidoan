@@ -732,6 +732,7 @@ const shoeProductController = {
           } else {
             console.log("product_color: ", product_color);
             // Tạo mảng chứa các truy vấn để thêm thông tin màu sắc vào bảng `shoe_product_colors`
+            if (product_color == undefined) product_color = []
             const addColorQueries = product_color.map((color) => {
               return `
             INSERT INTO shoe_product_colors (product_id, color_id, price, images)
@@ -862,7 +863,7 @@ const shoeProductController = {
             );
 
             const updateColorQueries = product_color.map((color) => {
-              let images = null;
+              let images = [];
               if (!color.images || color.images != undefined) {
                 images = JSON.stringify(color.images); // Chuyển đổi images thành chuỗi JSON
               }
