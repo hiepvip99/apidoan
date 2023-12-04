@@ -251,10 +251,12 @@ const shoeOrderController = {
     const offset = (page - 1) * step;
     const date = req.query.date || "";
     const account_id = req.query.account_id || "";
+    const id = req.query.id || "";
     // console.log("date:", date);
-    console.log("account_id:", account_id);
+    // console.log("account_id:", account_id);
+    console.log("id:", id);
     db.query(
-      `SELECT COUNT(*) AS total FROM shoe_order WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'`,
+      `SELECT COUNT(*) AS total FROM shoe_order WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%' AND id LIKE '%${id}%'`,
       (err, countResult) => {
         if (err) {
           console.error("Error executing MySQL query:", err);
@@ -275,7 +277,7 @@ const shoeOrderController = {
         const getAllOrdersQuery = `
     SELECT *
     FROM shoe_order 
-    WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%'
+    WHERE order_date LIKE '%${date}%' AND account_id LIKE '%${account_id}%' AND id LIKE '%${id}%'
     LIMIT ${parseInt(offset)}, ${parseInt(step)};
 `;
 
