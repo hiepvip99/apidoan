@@ -111,28 +111,80 @@ function getShoeColorById(req, res) {
 // Controller để tạo một màu giày mới
 function createShoeColor(req, res) {
   const { name, color_code } = req.body;
-  const query = 'INSERT INTO shoe_color (name, color_code) VALUES (?, ?)';
+  const selectQuery = 'SELECT * FROM shoe_color WHERE name = ? OR color_code = ?';
+  const insertQuery = 'INSERT INTO shoe_color (name, color_code) VALUES (?, ?)';
 
-  // Thực hiện truy vấn
-  db.query(query, [name, color_code], (error, results) => {
-    if (error) {
-      // res.status(500).json({ error: 'Lỗi truy vấn' });
+  // Kiểm tra trùng lặp trước khi thêm mới
+  db.query(selectQuery, [name, color_code], (selectError, selectResults) => {
+    if (selectError) {
       const data = {
         status: 500,
         error: true,
+        message: 'Lỗi truy vấn',
       };
       res.status(500).json(data);
-    } else {
+    } else if (selectResults.length > 0) {
+      // Trả về thông báo lỗi nếu trùng lặp
+      const duplicateFields = [];
+      if (selectResults.find((row) => row.name === name)) {
+        duplicateFields.push('name');
+      }
+      if (selectResults.find((row) => row.color_code === color_code)) {
+        duplicateFields.push('color_code');
+      }
+
       const data = {
-        status: 200,
-        // object: results[0],
+        status: 400,
+        error: true,
+        message: `Trường ${duplicateFields.join(', ')} đã tồn tại.`,
       };
-      res.status(200).json(data);
-      // const newColorId = results.insertId;
-      // res.status(201).json({ id: newColorId, name: name });
+      res.status(400).json(data);
+    } else {
+      // Thực hiện truy vấn để thêm mới nếu không có trùng lặp
+      db.query(insertQuery, [name, color_code], (insertError, insertResults) => {
+        if (insertError) {
+          const data = {
+            status: 500,
+            error: true,
+            message: 'Lỗi truy vấn khi thêm mới giày màu.',
+          };
+          res.status(500).json(data);
+        } else {
+          const data = {
+            status: 200,
+            message: 'Thêm mới giày màu thành công.',
+          };
+          res.status(200).json(data);
+        }
+      });
     }
   });
 }
+
+// function createShoeColor(req, res) {
+//   const { name, color_code } = req.body;
+//   const query = 'INSERT INTO shoe_color (name, color_code) VALUES (?, ?)';
+
+//   // Thực hiện truy vấn
+//   db.query(query, [name, color_code], (error, results) => {
+//     if (error) {
+//       // res.status(500).json({ error: 'Lỗi truy vấn' });
+//       const data = {
+//         status: 500,
+//         error: true,
+//       };
+//       res.status(500).json(data);
+//     } else {
+//       const data = {
+//         status: 200,
+//         // object: results[0],
+//       };
+//       res.status(200).json(data);
+//       // const newColorId = results.insertId;
+//       // res.status(201).json({ id: newColorId, name: name });
+//     }
+//   });
+// }
 
 // Controller để cập nhật một màu giày dựa trên ID
 function updateShoeColor(req, res) {

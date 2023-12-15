@@ -68,7 +68,7 @@ function getAllShoeCustomers(req, res) {
   const keyword = req.query.keyword || "";
 
   // Thực hiện truy vấn để lấy tổng số lượng khách hàng
-  db.query("SELECT COUNT(*) AS total FROM shoe_customer", (err, countResult) => {
+  db.query(`SELECT COUNT(*) AS total FROM shoe_customer WHERE name LIKE '${`%${keyword}%`}'`, (err, countResult) => {
     if (err) {
       console.error("Error executing MySQL query:", err);
       const data = {

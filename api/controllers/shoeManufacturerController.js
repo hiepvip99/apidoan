@@ -81,28 +81,72 @@ const shoeManufacturerController = {
     );
   },
 
+
   add(req, res) {
     const { name } = req.body;
-    db.query(
-      "INSERT INTO shoe_manufacturer (name) VALUES (?)",
-      [name],
-      (err, results) => {
-        if (err) {
-          console.error("Error executing MySQL query:", err);
-          const data = {
-            status: 500,
-            error: true,
-          };
-          res.status(500).json(data);
-          return;
-        }
-        const newManufacturer = {
-          status: 200,
+    const selectQuery = 'SELECT * FROM shoe_manufacturer WHERE name = ?';
+    const insertQuery = 'INSERT INTO shoe_manufacturer (name) VALUES (?)';
+
+    // Kiểm tra trùng lặp trước khi thêm mới
+    db.query(selectQuery, [name], (selectError, selectResults) => {
+      if (selectError) {
+        console.error('Error executing MySQL query:', selectError);
+        const data = {
+          status: 500,
+          error: true,
         };
-        res.status(200).json(newManufacturer);
+        res.status(500).json(data);
+      } else if (selectResults.length > 0) {
+        // Trả về thông báo lỗi nếu trùng lặp
+        const data = {
+          status: 400,
+          error: true,
+          message: 'Tên nhà sản xuất đã tồn tại.',
+        };
+        res.status(400).json(data);
+      } else {
+        // Thực hiện truy vấn để thêm mới nếu không có trùng lặp
+        db.query(insertQuery, [name], (insertError, insertResults) => {
+          if (insertError) {
+            console.error('Error executing MySQL query:', insertError);
+            const data = {
+              status: 500,
+              error: true,
+            };
+            res.status(500).json(data);
+          } else {
+            const newManufacturer = {
+              status: 200,
+            };
+            res.status(200).json(newManufacturer);
+          }
+        });
       }
-    );
+    });
   },
+  // add(req, res) {
+  //   const { name } = req.body;
+  //   db.query(
+  //     "INSERT INTO shoe_manufacturer (name) VALUES (?)",
+  //     [name],
+  //     (err, results) => {
+  //       if (err) {
+  //         console.error("Error executing MySQL query:", err);
+  //         const data = {
+  //           status: 500,
+  //           error: true,
+  //         };
+  //         res.status(500).json(data);
+  //         return;
+  //       }
+  //       const newManufacturer = {
+  //         status: 200,
+  //       };
+  //       res.status(200).json(newManufacturer);
+  //     }
+  //   );
+  // },
+
 
   update(req, res) {
     const id = req.body.id;

@@ -87,29 +87,73 @@ const ShoeController = {
 
   createCategory(req, res) {
     const { name } = req.body;
-    // const name = req.body.name;
-    console.log("name : ", req.body.name);
-    const sql = "INSERT INTO shoe_category SET ?";
-    db.query(sql, [ {name:name}], (error, result) => {
-      if (error) {
-        console.error("Error creating category:", error);
-        // res.status(500).json({ error: "Failed to create category" });
+    const selectQuery = 'SELECT * FROM shoe_category WHERE name = ?';
+    const insertQuery = 'INSERT INTO shoe_category SET ?';
+
+    // Kiểm tra trùng lặp trước khi thêm mới
+    db.query(selectQuery, [name], (selectError, selectResults) => {
+      if (selectError) {
+        console.error('Error executing MySQL query:', selectError);
         const data = {
           status: 500,
-          detail: "Failed to create category",
+          detail: 'Failed to check for duplicate category',
         };
         return res.status(500).json(data);
-      } else {
-        console.log("Category created successfully");
+      } else if (selectResults.length > 0) {
+        // Trả về thông báo lỗi nếu trùng lặp
         const data = {
-          status: 200,
-          detail: "Category created successfully",
+          status: 400,
+          detail: 'Category with the same name already exists',
         };
-        return res.status(200).json(data);
-        // res.status(200).json({ message: "Category created successfully" });
+        return res.status(400).json(data);
+      } else {
+        // Thực hiện truy vấn để thêm mới nếu không có trùng lặp
+        db.query(insertQuery, { name }, (insertError, insertResults) => {
+          if (insertError) {
+            console.error('Error executing MySQL query:', insertError);
+            const data = {
+              status: 500,
+              detail: 'Failed to create category',
+            };
+            return res.status(500).json(data);
+          } else {
+            console.log('Category created successfully');
+            const data = {
+              status: 200,
+              detail: 'Category created successfully',
+            };
+            return res.status(200).json(data);
+          }
+        });
       }
     });
   },
+
+  // createCategory(req, res) {
+  //   const { name } = req.body;
+  //   // const name = req.body.name;
+  //   console.log("name : ", req.body.name);
+  //   const sql = "INSERT INTO shoe_category SET ?";
+  //   db.query(sql, [ {name:name}], (error, result) => {
+  //     if (error) {
+  //       console.error("Error creating category:", error);
+  //       // res.status(500).json({ error: "Failed to create category" });
+  //       const data = {
+  //         status: 500,
+  //         detail: "Failed to create category",
+  //       };
+  //       return res.status(500).json(data);
+  //     } else {
+  //       console.log("Category created successfully");
+  //       const data = {
+  //         status: 200,
+  //         detail: "Category created successfully",
+  //       };
+  //       return res.status(200).json(data);
+  //       // res.status(200).json({ message: "Category created successfully" });
+  //     }
+  //   });
+  // },
 
   updateCategory(req, res) {
     const categoryId = req.body.id;

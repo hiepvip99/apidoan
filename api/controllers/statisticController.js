@@ -202,19 +202,38 @@ const shoeStatisticController = {
   getStatisticByMonthly(req, res) {
     const { fromMonth, toMonth } = req.query;
 
+    // const query = `
+    //     SELECT
+    //         DATE_FORMAT(order_date, '%Y-%m') AS month,
+    //         COALESCE(SUM(total_price), 0) AS revenue,
+    //         COALESCE(SUM(total_price) OVER (), 0) AS total_revenue
+    //     FROM
+    //         shoe_order
+    //     WHERE
+    //         (order_date >= '${fromMonth}-01' AND order_date <= '${toMonth}-12')
+    //         AND status_id = 4
+    //     GROUP BY
+    //         DATE_FORMAT(order_date, '%Y-%m');
+    // `;
+
     const query = `
-        SELECT
-            DATE_FORMAT(order_date, '%Y-%m') AS month,
-            COALESCE(SUM(total_price), 0) AS revenue,
-            COALESCE(SUM(total_price) OVER (), 0) AS total_revenue
-        FROM
-            shoe_order
-        WHERE
-            (order_date >= '${fromMonth}-01' AND order_date <= '${toMonth}-12')
-            AND status_id = 4
-        GROUP BY
-            DATE_FORMAT(order_date, '%Y-%m');
-    `;
+    SELECT
+        DATE_FORMAT(order_date, '%Y-%m') AS month,
+        COALESCE(SUM(total_price), 0) AS revenue,
+        (
+            SELECT COALESCE(SUM(total_price), 0)
+            FROM shoe_order
+            WHERE (order_date >= '${fromMonth}-01' AND order_date <= '${toMonth}-12')
+                AND status_id = 4
+        ) AS total_revenue
+    FROM
+        shoe_order
+    WHERE
+        (order_date >= '${fromMonth}-01' AND order_date <= '${toMonth}-12')
+        AND status_id = 4
+    GROUP BY
+        DATE_FORMAT(order_date, '%Y-%m');
+`;
 
     db.query(query, (err, results) => {
       if (err) {

@@ -22,5 +22,9 @@ router.get(
   "/shoe_customers/account/:accountId",
   shoeCustomerController.getShoeCustomersByAccountId
 );
+router.get(
+  "/shoe_customers/vip",
+  shoeCustomerController.getVipCustomer
+);
 
 module.exports = router;
