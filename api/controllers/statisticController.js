@@ -267,7 +267,7 @@ const shoeStatisticController = {
   getStatisticProduct: async (req, res) => {
     try {
       const { fromDate, toDate } = req.query;
-
+      console.log("Vao ham roi:");
       // Truy vấn để lấy 10 sản phẩm bán chạy nhất
       // const result = await db.query(
       //   `
@@ -314,7 +314,7 @@ const shoeStatisticController = {
         JOIN shoe_order_detail sod ON sp.id = sod.product_id
         JOIN shoe_order so ON sod.order_id = so.id
       WHERE
-        so.order_date BETWEEN ${fromDate} AND ${toDate}
+        so.order_date BETWEEN '${fromDate}' AND '${toDate}'
         AND so.status_id = 4
       GROUP BY
         sp.id
@@ -329,10 +329,11 @@ const shoeStatisticController = {
           res.status(500).json({ error: err });
           return;
         }
-        const totalRevenue = results.length > 0 ? results[0].total_revenue : 0;
+        // const totalRevenue = results.length > 0 ? results[0].total_revenue : 0;
         const data = {
-          data: results.map(item => ({ day: item.day, revenue: item.revenue })),
-          total_revenue: totalRevenue,
+          // data: results.map(item => ({ day: item.day, revenue: item.revenue })),
+          // total_revenue: totalRevenue,
+          data: results,
           status: 200,
         };
         res.status(200).json(data);
