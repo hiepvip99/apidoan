@@ -1,5 +1,5 @@
 const db = require("../databases/db");
-
+const { Sequelize } = require('sequelize');
 const shoeStatisticController = {
   //   getStatisticByWeekly(req, res) {
   //     const { fromday, today } = req.query;
@@ -264,6 +264,84 @@ const shoeStatisticController = {
     });
   },
 
+  getStatisticProduct: async (req, res) => {
+    try {
+      const { fromDate, toDate } = req.query;
+
+      // Truy vấn để lấy 10 sản phẩm bán chạy nhất
+      // const result = await db.query(
+      //   `
+      // SELECT 
+      //   sp.id,
+      //   sp.name,
+      //   SUM(sod.quantity) AS total_quantity
+      // FROM
+      //   shoe_product sp
+      //   JOIN shoe_order_detail sod ON sp.id = sod.product_id
+      //   JOIN shoe_order so ON sod.order_id = so.id
+      // WHERE
+      //   so.order_date BETWEEN ${fromDate} AND ${toDate}
+      //   AND so.status_id = 4
+      // GROUP BY
+      //   sp.id
+      // ORDER BY
+      //   total_quantity DESC
+      // LIMIT 10
+      // `,
+      //   {
+      //     // replacements: { fromDate, toDate },
+      //     type: Sequelize.QueryTypes.SELECT,
+      //   }
+      // );
+
+      // console.log(" result result:", result);
+
+      // // Chuyển đổi kết quả thành một mảng các đối tượng
+      // const topSellingProducts = result.map(item => ({
+      //   id: item.id,
+      //   name: item.name,
+      //   total_quantity: item.total_quantity,
+      // }));
+
+      // res.json({ top_selling_products: topSellingProducts });
+      const query = `
+        SELECT
+        sp.id,
+        sp.name,
+        SUM(sod.quantity) AS total_quantity
+      FROM
+        shoe_product sp
+        JOIN shoe_order_detail sod ON sp.id = sod.product_id
+        JOIN shoe_order so ON sod.order_id = so.id
+      WHERE
+        so.order_date BETWEEN ${fromDate} AND ${toDate}
+        AND so.status_id = 4
+      GROUP BY
+        sp.id
+      ORDER BY
+        total_quantity DESC
+      LIMIT 10
+    `;
+
+      db.query(query, (err, results) => {
+        if (err) {
+          console.error("Error executing query:", err);
+          res.status(500).json({ error: err });
+          return;
+        }
+        const totalRevenue = results.length > 0 ? results[0].total_revenue : 0;
+        const data = {
+          data: results.map(item => ({ day: item.day, revenue: item.revenue })),
+          total_revenue: totalRevenue,
+          status: 200,
+        };
+        res.status(200).json(data);
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   // getStatisticByMonthly(req, res) {
   //   const { fromMonth, toMonth } = req.query;
 
@@ -308,7 +386,53 @@ const shoeStatisticController = {
   //     res.status(200).json({ data, total_revenue: totalRevenue, status: 200 });
   //   });
   // },
-
 };
 
 module.exports = shoeStatisticController;
+
+
+
+// async function getStatisticProduct(req, res) {
+//   try {
+//     const { fromDate, toDate } = req.query;
+
+//     // Truy vấn để lấy 10 sản phẩm bán chạy nhất
+//     const result = await sequelize.query(
+//       `
+//       SELECT 
+//         sp.id,
+//         sp.name,
+//         SUM(sod.quantity) AS total_quantity
+//       FROM
+//         shoe_products sp
+//         JOIN shoe_order_details sod ON sp.id = sod.product_id
+//         JOIN shoe_orders so ON sod.order_id = so.id
+//       WHERE
+//         so.order_date BETWEEN :fromDate AND :toDate
+//         AND so.status_id = 4
+//       GROUP BY
+//         sp.id
+//       ORDER BY
+//         total_quantity DESC
+//       LIMIT 10
+//       `,
+//       {
+//         replacements: { fromDate, toDate },
+//         type: Sequelize.QueryTypes.SELECT,
+//       }
+//     );
+
+//     // Chuyển đổi kết quả thành một mảng các đối tượng
+//     const topSellingProducts = result.map(item => ({
+//       id: item.id,
+//       name: item.name,
+//       total_quantity: item.total_quantity,
+//     }));
+
+//     res.json({ top_selling_products: topSellingProducts });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// }
+
+// module.exports = { getStatisticProduct };
