@@ -202,7 +202,7 @@ function getAllShoeCustomers(req, res) {
 // }
 function getNotificationByAccountId(req, res) {
   const accountId = req.query.accountId;
-  const query = 'SELECT * FROM shoe_notification WHERE account_id = ? LIMIT 50';
+  const query = 'SELECT * FROM shoe_notification WHERE account_id = ?';
 
   db.query(query, [accountId], (error, results) => {
     if (error) {

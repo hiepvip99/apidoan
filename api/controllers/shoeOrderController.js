@@ -560,9 +560,14 @@ const shoeOrderController = {
   },
 
   add(req, res) {
+    const currentDate = new Date();
+
+    // Điều chỉnh múi giờ
+    const gmtOffset = 14 * 60; // Đối với GMT+7
+    const adjustedDate = new Date(currentDate.getTime() + gmtOffset * 60000);
+
     const {
       account_id,
-      order_date,
       total_price,
       status_id,
       total_quantity,
@@ -574,7 +579,6 @@ const shoeOrderController = {
     // Kiểm tra các trường thông tin bắt buộc của đơn hàng
     if (
       !account_id ||
-      !order_date ||
       !total_price ||
       !status_id ||
       !payment_methods ||
@@ -586,7 +590,7 @@ const shoeOrderController = {
     // Tạo truy vấn để thêm đơn hàng mới vào bảng `shoe_order`
     const addOrderQuery = `
     INSERT INTO shoe_order (account_id, order_date, total_price, status_id, total_quantity, payment_methods, delivery_address)
-    VALUES (${account_id}, '${order_date}', ${total_price}, ${status_id}, ${total_quantity}, '${payment_methods}', '${delivery_address}')
+    VALUES (${account_id}, '${adjustedDate.toISOString()}', ${total_price}, ${status_id}, ${total_quantity}, '${payment_methods}', '${delivery_address}')
   `;
 
     db.query(addOrderQuery, (err, orderResult) => {
@@ -1087,6 +1091,11 @@ const shoeOrderController = {
   // },
 
   addReview(req, res) {
+    const currentDate = new Date();
+
+    // Điều chỉnh múi giờ
+    const gmtOffset = 7 * 60; // Đối với GMT+7
+    const adjustedDate = new Date(currentDate.getTime() + gmtOffset * 60000);
     const { product_id, customer_id, order_detail_id, rating, review_text } = req.body;
     const review = {
       product_id,
@@ -1094,7 +1103,7 @@ const shoeOrderController = {
       order_detail_id,
       rating,
       review_text,
-      created_at: new Date(),
+      created_at: adjustedDate.toISOString(),
     };
 
     db.query('INSERT INTO shoe_review SET ?', review, (error, results, fields) => {
@@ -1264,6 +1273,32 @@ const shoeOrderController = {
 
     const currentDate = new Date();
 
+    // Điều chỉnh múi giờ
+    const gmtOffset = 7 * 60; // Đối với GMT+7
+    const adjustedDate = new Date(currentDate.getTime() + gmtOffset * 60000);
+    console.log('date    ada',adjustedDate.toISOString());
+
+    const queryHistory = `INSERT INTO shoe_order_history_status (order_id, status_id, changed_time)
+                  VALUES (${id}, ${status_id}, '${adjustedDate.toISOString()}');`;
+
+    console.log(queryHistory);
+
+    db.query(queryHistory, (err, resultSS) => {
+      console.log("vao queryHistory");
+      if (err) {
+        console.error("Error add shoe_order_history:", err.message); // In thông báo lỗi chi tiết
+        const data = {
+          status: 500,
+          error: true,
+          message: "Internal Server Error",
+        };
+        res.status(500).json(data);
+        return;
+      }
+      console.log("result", resultSS);
+      // Xử lý kết quả nếu cần thiết
+    });
+
     
 
     // Trường hợp status_id là 5 hoặc 6
@@ -1307,26 +1342,7 @@ const shoeOrderController = {
             );
           });
           //
-          const queryHistory = `INSERT INTO shoe_order_history_status (order_id, status_id, changed_time)
-                  VALUES (${id}, ${status_id}, '${currentDate.toISOString()}');`;
-
-          console.log(queryHistory);
-
-          db.query(queryHistory, (err, resultSS) => {
-            console.log("vao queryHistory");
-            if (err) {
-              console.error("Error add shoe_order_history:", err.message); // In thông báo lỗi chi tiết
-              const data = {
-                status: 500,
-                error: true,
-                message: "Internal Server Error",
-              };
-              res.status(500).json(data);
-              return;
-            }
-            console.log("result", resultSS);
-            // Xử lý kết quả nếu cần thiết
-          });
+          
 
           // Tiếp tục xử lý thông báo và trả về kết quả cho người dùng
           db.query(
