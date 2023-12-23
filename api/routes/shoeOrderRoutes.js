@@ -18,6 +18,8 @@ router.get("/review", shoeOrderController.getReview);
 
 router.get("/getAllReview", shoeOrderController.getAllReview);
 
+router.get("/getAllOrderHistory", shoeOrderController.getAllOrderHistory);
+
 router.get("/check_review", shoeOrderController.checkReviewExistence);
 router.get("/max_id", shoeOrderController.getMaxId);
 

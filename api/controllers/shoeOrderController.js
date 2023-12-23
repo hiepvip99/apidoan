@@ -1251,6 +1251,7 @@ const shoeOrderController = {
 
   statusChange(req, res) {
     const id = req.body.id;
+    // const status_name = req.body.status_name;
     const status_id = req.body.status_id;
 
     if (!id || !status_id) {
@@ -1260,6 +1261,10 @@ const shoeOrderController = {
       };
       return res.status(500).json(data);
     }
+
+    const currentDate = new Date();
+
+    
 
     // Trường hợp status_id là 5 hoặc 6
     if (status_id === 5 || status_id === 6) {
@@ -1301,6 +1306,27 @@ const shoeOrderController = {
               }
             );
           });
+          //
+          const queryHistory = `INSERT INTO shoe_order_history_status (order_id, status_id, changed_time)
+                  VALUES (${id}, ${status_id}, '${currentDate.toISOString()}');`;
+
+          console.log(queryHistory);
+
+          db.query(queryHistory, (err, resultSS) => {
+            console.log("vao queryHistory");
+            if (err) {
+              console.error("Error add shoe_order_history:", err.message); // In thông báo lỗi chi tiết
+              const data = {
+                status: 500,
+                error: true,
+                message: "Internal Server Error",
+              };
+              res.status(500).json(data);
+              return;
+            }
+            console.log("result", resultSS);
+            // Xử lý kết quả nếu cần thiết
+          });
 
           // Tiếp tục xử lý thông báo và trả về kết quả cho người dùng
           db.query(
@@ -1333,7 +1359,6 @@ const shoeOrderController = {
                     res.status(500).json(data);
                     return;
                   }
-
                   if (notificationResults.length > 0) {
                     const notificationToken = notificationResults[0].notification_token;
                     const user_account_id = notificationResults[0].id_account;
@@ -1481,6 +1506,22 @@ const shoeOrderController = {
       res.status(200).json(data);
     });
   },
+
+  getAllOrderHistory(req, res) {
+    const order_id = req.query.order_id;
+    db.query(`SELECT * FROM shoe_order_history_status WHERE order_id = ${order_id}`, (err, statusResult) => {
+      if (err) {
+        console.log("err:", err);
+        return res.status(500);
+      }
+      const data = {
+        status: 200,
+        data: statusResult,
+      };
+      res.status(200).json(data);
+    });
+  },
+
 
   // delete(req, res) {
   //   const id = req.params.id;
